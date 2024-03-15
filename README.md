@@ -7,7 +7,7 @@ https://github.com/kwokyto/usp-queue-bot
 This repository uses Go so that scalability with concurrency will not become an issue.
 
 # progress so far
-Local server hosting now functional.
+15/3/24: Local server hosting now functional.
 
 # how to set up
 BotFather stuff
