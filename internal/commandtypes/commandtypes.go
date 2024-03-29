@@ -1,15 +1,10 @@
 package commandtypes
 
-import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-// Represents the valid commands that the bot handles
-type BotCommand string
-
-// Feedback given to the user after a command is ran
-type BotFeedback string
-
-type BotCommandHandler struct {
-	Command     BotCommand
+type CommandHandler struct {
+	Command     string
 	Description string
-	Feedback    func(update tgbotapi.Update) BotFeedback
+	// conducts action associated with function and returns a response providing feedback to the user
+	Action func(update tgbotapi.Update) string
 }

@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )
 
@@ -37,22 +37,20 @@ func main() {
 	}
 	log.Println("Successfully connected!")
 
-	// Temp skeleton functionality implementation
-	// abstract into an "internal" folder once program becomes complex enough, and repeated patterns are observed.
+	// 4: Update bot with autofill menu that informs user of the possible commands available
+	registered := []tgbotapi.BotCommand{{Command: "s1", Description: "hello"}}
+	menu := tgbotapi.NewSetMyCommands(registered...)
+	bot.Send(menu)
 
 	// Set up updates configuration
-	updates := tgbotapi.NewUpdate(0)
-	updates.Timeout = 60
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
 
 	// Start polling for updates
-	updatesChannel, err := bot.GetUpdatesChan(updates)
-	if err != nil {
-		log.Fatalf("Error getting updates channel: %v", err)
-	}
+	updates := bot.GetUpdatesChan(u)
 	log.Println("Listening for incoming messages...")
 
-	// Process incoming updates
-	for update := range updatesChannel {
+	for update := range updates {
 
 		// Check if the update contains a message
 		if update.Message == nil || !update.Message.IsCommand() {
@@ -60,6 +58,7 @@ func main() {
 		}
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+
 		if update.Message.IsCommand() {
 			switch update.Message.Command() {
 			case "hi":
