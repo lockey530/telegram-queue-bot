@@ -7,7 +7,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
 	"github.com/josh1248/nusc-queue-bot/internal/botcommands"
-	"github.com/josh1248/nusc-queue-bot/internal/importtest"
 )
 
 func main() {
@@ -56,7 +55,6 @@ func main() {
 	// Process incoming updates
 	for update := range updatesChannel {
 		log.Println(botcommands.Hi)
-		log.Println(importtest.X())
 
 		// Check if the update contains a message
 		if update.Message == nil || !update.Message.IsCommand() {
