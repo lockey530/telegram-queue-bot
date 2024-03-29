@@ -13,6 +13,7 @@ func main() {
 	// Setup procedure
 
 	// 1: connect with API
+	log.Println("Connecting to bot...")
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalln("Error loading .env file")
@@ -34,6 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating bot: %v", err)
 	}
+	log.Println("Successfully connected!")
 
 	// Temp skeleton functionality implementation
 	// abstract into an "internal" folder once program becomes complex enough, and repeated patterns are observed.
@@ -47,6 +49,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error getting updates channel: %v", err)
 	}
+	log.Println("Listening for incoming messages...")
 
 	// Process incoming updates
 	for update := range updatesChannel {
