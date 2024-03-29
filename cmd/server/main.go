@@ -6,6 +6,7 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
+	"github.com/josh1248/nusc-queue-bot/internal/handlers"
 )
 
 func main() {
@@ -60,6 +61,7 @@ func main() {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
 		if update.Message.IsCommand() {
+			handlers.HandleCommand()
 			switch update.Message.Command() {
 			case "hi":
 				msg.Text = "Hello!"
