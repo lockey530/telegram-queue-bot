@@ -54,12 +54,28 @@ func main() {
 	// Process incoming updates
 	for update := range updatesChannel {
 		// Check if the update contains a message
-		if update.Message == nil {
+		if update.Message == nil || !update.Message.IsCommand() {
 			continue
 		}
 
-		// Respond with "Hello world!"
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "very queue much wow (hi tian wei)")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+		if update.Message.IsCommand() {
+			switch update.Message.Command() {
+			case "hi":
+				msg.Text = "Hello!"
+			case "bye":
+				msg.Text = "Goodbye!"
+			case "name":
+				// Check if the command has an argument
+				if len(update.Message.CommandArguments()) > 0 {
+					msg.Text = "Your name is " + update.Message.CommandArguments() + "."
+				} else {
+					msg.Text = "Please provide your name with the command, e.g., /name John."
+				}
+			default:
+				msg.Text = "Sorry, I don't understand your command =("
+			}
+		}
 
 		// Send the message
 		_, err := bot.Send(msg)
