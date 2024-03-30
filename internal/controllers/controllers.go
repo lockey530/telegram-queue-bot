@@ -4,7 +4,6 @@ import (
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/josh1248/nusc-queue-bot/internal/commandtypes"
 	"github.com/josh1248/nusc-queue-bot/internal/handlers"
 )
 
@@ -21,7 +20,7 @@ func ReceiveCommand(userMessage tgbotapi.Update) (reply tgbotapi.MessageConfig) 
 		reply.Text = handlers.NonCommandHandler(userMessage)
 	} else {
 		log.Printf("Processing command %s from @%s...\n", userMessage.Message.Text, username)
-		for _, command := range commandtypes.AvailableCommands {
+		for _, command := range handlers.AvailableCommands {
 			if userMessage.Message.Command() == command.Command {
 				reply.Text = command.Handler(userMessage)
 				break

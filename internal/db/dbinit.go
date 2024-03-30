@@ -10,7 +10,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func EstablishDBConnection() {
+// Must be called before any interaction with the DB to initialize the db connection.
+func EstablishDBConnection(clearData bool) {
 	log.Println("Connecting to database...")
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -28,11 +29,12 @@ func EstablishDBConnection() {
 	} else if port == "" {
 		log.Fatalln("Port not provided in .env file.")
 	}
-	// password := os.Getenv("POSTGRES_PASSWORD")
+
 	db, err := sqlx.Connect(
 		"postgres",
 		fmt.Sprintf("user=%s dbname=%s port=%s sslmode=disable",
 			user, dbname, port))
+
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -50,6 +52,42 @@ func EstablishDBConnection() {
 		log.Fatal("Error retrieving connection information:", err)
 	}
 
-	fmt.Printf("Database Name: %s\n", databaseName)
-	fmt.Printf("User Name: %s\n", userName)
+	log.Printf("Database Name: %s\n", databaseName)
+	log.Printf("User Name: %s\n", userName)
+
+	initSchemaIfEmpty(db)
+
+	if clearData {
+		removeDBEntries(db)
+	}
+}
+
+func initSchemaIfEmpty(db *sqlx.DB) {
+	var tableExists bool
+
+	err := db.Get(&tableExists, checkExistenceQuery, "queue")
+	if err != nil {
+		log.Fatal("Error retrieving connection information:", err)
+	}
+
+	if !tableExists {
+		db.MustExec(queueSchema)
+		log.Println("schema initiated for the queue.")
+		db.MustExec(adminSchema)
+		log.Println("Schema initiated for admins.")
+	} else {
+		log.Println("users schema already initiated.")
+	}
+
+	err = db.Get(&tableExists, checkExistenceQuery, "admins")
+	if err != nil {
+		log.Fatal("Error retrieving connection information:", err)
+	}
+
+	if !tableExists {
+		db.MustExec(adminSchema)
+		log.Println("Schema initiated for admins.")
+	} else {
+		log.Println("admin schema already initiated.")
+	}
 }

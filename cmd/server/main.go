@@ -3,12 +3,13 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
-	"github.com/josh1248/nusc-queue-bot/internal/commandtypes"
 	"github.com/josh1248/nusc-queue-bot/internal/controllers"
 	"github.com/josh1248/nusc-queue-bot/internal/db"
+	"github.com/josh1248/nusc-queue-bot/internal/handlers"
 )
 
 func main() {
@@ -34,8 +35,8 @@ func main() {
 	}
 	log.Println("Successfully connected!")
 
-	menuOptions := make([]tgbotapi.BotCommand, len(commandtypes.AvailableCommands))
-	for i, command := range commandtypes.AvailableCommands {
+	menuOptions := make([]tgbotapi.BotCommand, len(handlers.AvailableCommands))
+	for i, command := range handlers.AvailableCommands {
 		menuOptions[i] = tgbotapi.BotCommand{Command: command.Command, Description: command.Description}
 	}
 	menu := tgbotapi.NewSetMyCommands(menuOptions...)
@@ -44,7 +45,19 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	db.EstablishDBConnection()
+	log.Println("Checking if db data is to be cleared...")
+	tmp := os.Getenv("CLEAR_DATA")
+	if tmp == "" {
+		log.Fatalln("Could not read CLEAR_DATA info from .env")
+	}
+
+	toClearData, err := strconv.ParseBool(tmp)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Printf("Check done, CLEAR_DATA=%t", toClearData)
+	db.EstablishDBConnection(toClearData)
 
 	updates := bot.GetUpdatesChan(u)
 	log.Println("Listening for incoming messages...")
