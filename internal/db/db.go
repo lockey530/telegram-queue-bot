@@ -8,12 +8,6 @@ import (
 )
 
 const schema string = `
-CREATE TABLE commands (
-	id INTEGER PRIMARY KEY,
-	command TEXT UNIQUE NOT NULL,
-	description TEXT
-)
-
 CREATE TABLE queue (
 	tele_handle TEXT PRIMARY KEY
 )

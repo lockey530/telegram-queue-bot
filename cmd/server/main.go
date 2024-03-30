@@ -6,7 +6,8 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
-	"github.com/josh1248/nusc-queue-bot/internal/controller"
+	"github.com/josh1248/nusc-queue-bot/internal/commandtypes"
+	"github.com/josh1248/nusc-queue-bot/internal/controllers"
 )
 
 func main() {
@@ -32,31 +33,9 @@ func main() {
 	}
 	log.Println("Successfully connected!")
 
-	menuOptions := []tgbotapi.BotCommand{
-		{
-			Command:     "join",
-			Description: "Join the virtual queue for the photobooth.",
-		},
-		{
-			Command:     "leave",
-			Description: "Leave the virtual queue for the photobooth.",
-		},
-		{
-			Command:     "howlong",
-			Description: "Returns the expected time to wait in the queue",
-		},
-		{
-			Command:     "help",
-			Description: "Explains the main functionalities of the bot.",
-		},
-		{
-			Command:     "greet",
-			Description: "The bot is friendly :)",
-		},
-		{
-			Command:     "start",
-			Description: "Explains the main functionalities of the bot.",
-		},
+	menuOptions := make([]tgbotapi.BotCommand, len(commandtypes.AvailableCommands))
+	for i, command := range commandtypes.AvailableCommands {
+		menuOptions[i] = tgbotapi.BotCommand{Command: command.Command, Description: command.Description}
 	}
 	menu := tgbotapi.NewSetMyCommands(menuOptions...)
 	bot.Send(menu)
@@ -71,7 +50,7 @@ func main() {
 		if update.Message == nil {
 			continue
 		}
-		replyMessage := controller.ReceiveCommand(update)
+		replyMessage := controllers.ReceiveCommand(update)
 		_, err := bot.Send(replyMessage)
 		if err != nil {
 			log.Printf("Error sending message %s\n", err)
