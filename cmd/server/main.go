@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/josh1248/nusc-queue-bot/internal/commandtypes"
 	"github.com/josh1248/nusc-queue-bot/internal/controllers"
+	"github.com/josh1248/nusc-queue-bot/internal/db"
 )
 
 func main() {
@@ -42,6 +43,8 @@ func main() {
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
+
+	db.EstablishDBConnection()
 
 	updates := bot.GetUpdatesChan(u)
 	log.Println("Listening for incoming messages...")

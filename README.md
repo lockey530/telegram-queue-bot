@@ -8,8 +8,15 @@ This repository uses Go so that scalability with concurrency will not become an 
 
 # progress so far
 15/3/24: Local server hosting now functional.
+29/3/24: Now provides a menu of available options for use
 
 # how to set up
+
+## :warning: A cautionary note 
+- Local server setup in this repo will require your API keys and passwords to be placed within a .env file. Unless you modify this code to use secret manager applications instead (or other means), you should not locally host this bot if your computer is shared!.
+- This is obviously a hobby project with ssl-mode off and no passwords required - security is not considered since my database storage is low-value.
+
+## Clone this repo
 
 ## Register Your Bot on Telegram
 *Accurate as of Apr 2024*

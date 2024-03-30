@@ -11,6 +11,8 @@ Creating this so that I will have an easier time developing Go stuff in the futu
   - [How to Hello World - listen for updates](#how-to-hello-world---listen-for-updates)
   - [Setting up Telegram menu selections](#setting-up-telegram-menu-selections)
   - [How to](#how-to)
+- [Postgres](#postgres)
+  - [How to set-up](#how-to-set-up)
 
 
 # General Go Stuff
@@ -60,3 +62,26 @@ Uses github.com/go-telegram-bot-api/telegram-bot-api - module name of tgbotapi t
 ## Setting up Telegram menu selections
 
 ## How to 
+
+# Postgres
+
+## How to set-up
+Find any appropriate download method in https://www.postgresql.org/download/ to get Postgres up and running. I used the Postgres.app method as explained in https://www.youtube.com/watch?v=wTqosS71Dc4 for ease of setup.
+
+My version of the app used is the following:
+
+![alt text](images/postgres_setup.png)
+
+Then, configure $PATH so that u can use psql, a CLI to interact with Postgres:
+
+```
+sudo mkdir -p /etc/paths.d &&
+echo /Applications/Postgres.app/Contents/Versions/latest/bin | sudo tee /etc/paths.d/postgresapp
+```
+
+After you are done, you should be able to connect to the database:
+
+![alt text](images/postgres_setupdone.png)
+
+`psql postgres://<system username>@localhost:5432/<system username>`
+system username refers to the username you use to log in to your actual file system.
