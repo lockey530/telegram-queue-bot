@@ -1,4 +1,4 @@
-package db
+package dbaccess
 
 type QueueUser struct {
 	queueID    uint64 `db:"queue_id" note:"Postgres-generated identifier"`
@@ -7,7 +7,7 @@ type QueueUser struct {
 
 const queueSchema string = `
 	CREATE TABLE queue (
-		queue_id				INTEGER PRIMARY KEY,
+		queue_id				SERIAL PRIMARY KEY,
 		user_handle		 		TEXT 	UNIQUE NOT NULL
 	);
 `
@@ -19,8 +19,8 @@ type AdminUser struct {
 
 const adminSchema string = `
 	CREATE TABLE admins (
-		admin_id				INTEGER PRIMARY KEY,
-		admin_handle		 		TEXT 	UNIQUE NOT NULL
+		admin_id				SERIAL PRIMARY KEY,
+		admin_handle		 	TEXT 	UNIQUE NOT NULL
 	);
 `
 

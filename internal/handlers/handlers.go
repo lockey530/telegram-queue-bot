@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/josh1248/nusc-queue-bot/internal/commandtypes"
+	"github.com/josh1248/nusc-queue-bot/internal/dbaccess"
 )
 
 // Command and description is hard-coded within the HelpFunction for circular dependencies.
@@ -68,8 +70,10 @@ func HelpCommand(userMessage tgbotapi.Update) (feedback string) {
 	/leave - leave the photobooth queue if you have previously joined.
 
 	(dk) /wait - need some time? place yourself 5 slots behind the queue (1-time only).
-	
+
 	/help or /start - see this message again.
+
+	For more options, check out the 'Menu' button at the bottom left of this chat!
 	`
 }
 
@@ -79,6 +83,12 @@ func GreetCommand(userMessage tgbotapi.Update) (feedback string) {
 }
 
 func JoinCommand(userMessage tgbotapi.Update) (feedback string) {
+	err := dbaccess.JoinQueue(userMessage.SentFrom().UserName)
+	if err != nil {
+		feedback = "You were unable to join the queue due to an unexpected error :("
+		log.Println(err)
+	}
+
 	feedback = "Joined the queue..."
 	return feedback
 }

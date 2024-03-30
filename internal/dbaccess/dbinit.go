@@ -1,4 +1,4 @@
-package db
+package dbaccess
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
+
+var db *sqlx.DB
 
 // Must be called before any interaction with the DB to initialize the db connection.
 func EstablishDBConnection(clearData bool) {
@@ -30,7 +32,7 @@ func EstablishDBConnection(clearData bool) {
 		log.Fatalln("Port not provided in .env file.")
 	}
 
-	db, err := sqlx.Connect(
+	db, err = sqlx.Connect(
 		"postgres",
 		fmt.Sprintf("user=%s dbname=%s port=%s sslmode=disable",
 			user, dbname, port))

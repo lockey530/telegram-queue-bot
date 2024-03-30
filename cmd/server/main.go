@@ -8,7 +8,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 	"github.com/josh1248/nusc-queue-bot/internal/controllers"
-	"github.com/josh1248/nusc-queue-bot/internal/db"
+	"github.com/josh1248/nusc-queue-bot/internal/dbaccess"
 	"github.com/josh1248/nusc-queue-bot/internal/handlers"
 )
 
@@ -57,7 +57,7 @@ func main() {
 	}
 
 	log.Printf("Check done, CLEAR_DATA=%t", toClearData)
-	db.EstablishDBConnection(toClearData)
+	dbaccess.EstablishDBConnection(toClearData)
 
 	updates := bot.GetUpdatesChan(u)
 	log.Println("Listening for incoming messages...")
