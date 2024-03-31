@@ -19,6 +19,8 @@ Creating this so that I will have an easier time developing Go stuff in the futu
     - [1: Volumes](#1-volumes)
     - [2: env files](#2-env-files)
     - [3: Postgres connection within Docker](#3-postgres-connection-within-docker)
+    - [4: Nvm, ditch Docker Compose entirely](#4-nvm-ditch-docker-compose-entirely)
+    - [5: Secrets and env variables](#5-secrets-and-env-variables)
 
 
 # General Go Stuff
@@ -127,7 +129,7 @@ The solution was to clear out my volumes (which is Docker's term for persistent 
 
 ### 2: env files
 
-My go files read off a `.env` file, which I had to copy into the container with `COPY .env .env` within my Go Dockerfile.
+My go files read off a `.env` file, which I had to copy into the container with `COPY .env .env` within my Go Dockerfile. Additionally, I had to comment out `
 
 :warning: Note: This is a small-scale project - using secrets stored in .env files is not the recommended way to keep your secrets since `.env` is in plaintext. If you happen to use this code for more high-value applications, you should definitely use a secrets manager. (but a lot of repos still use the .env file :eyes:)
 
@@ -185,6 +187,15 @@ secrets:
   db-password:
     file: db/password.txt
 ```
+### 4: Nvm, ditch Docker Compose entirely
+
+Except - most cloud services for dynamic things do not support docker compose! There have been plans to consider Docker Compose in Railway, but it has not been implemented. I tried looking for free options around, but things like Google Cloud Run do not support Docker compose as well :( Looks like I spent a lot of time finding an un-useable solution!
+
+I had to scale back and throw away `compose.yaml` entirely. Thankfully, the solution in [#2](#2-env-files) still works. This solution also helped to avoid some of the pitfalls
+
+### 5: Secrets and env variables
+
+
 
 Then, further configure the compose.yaml and Dockerfiles based on documentation if required: https://docs.docker.com/reference/dockerfile/ https://docs.docker.com/compose/compose-file/?uuid=14e6d05b-8c4a-4389-b002-3e27079fd972%0A
 Lastly, store persistent data and stuff with volumes: https://docs.docker.com/storage/volumes/

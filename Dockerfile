@@ -70,11 +70,13 @@ USER appuser
 
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/server /bin/
+COPY .env .env
 
-ENV BOT_TOKEN=exampleexample
-ENV CLEAR_DATA=true
-ENV POSTGRES_USER=postgres
-ENV REMOTE_DEPLOY=true
+
+# ENV BOT_TOKEN=exampleexample
+# ENV CLEAR_DATA=true
+# ENV POSTGRES_USER=postgres
+# ENV REMOTE_DEPLOY=true
 # ENVPOSTGRES_DB=postgres
 # POSTGRES_DBNAME=postgres
 # POSTGRES_PORT=5432
