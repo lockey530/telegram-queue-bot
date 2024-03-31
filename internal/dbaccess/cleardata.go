@@ -7,8 +7,7 @@ import (
 )
 
 func removeDBEntries(db *sqlx.DB) {
-	_, err := db.Exec(wipeData)
-	if err != nil {
+	if _, err := db.Exec(wipeData); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Entries wiped.")

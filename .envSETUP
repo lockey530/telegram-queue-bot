@@ -1,5 +1,5 @@
 BOT_TOKEN=(your bot API here)
 CLEAR_DATA=(boolean: wipes data regarding the queue bot if needed - use during testing to clear junk data, and turn off otherwise.)
 POSTGRES_USER=(your Postgres user with superuser privilege.)
-POSTGRES_DBNAME=(your Postgres database to connect to - you can use the Postgres app or other means to create or check which database you want to connect to.)
+POSTGRES_DB=(your Postgres database to connect to - you can use the Postgres app or other means to create or check which database you want to connect to.)
 POSTGRES_PORT=(your server port for Postgres, typically 5432)

@@ -24,6 +24,17 @@ func EstablishDBConnection(clearData bool) {
 	dbname := os.Getenv("POSTGRES_DBNAME")
 	port := os.Getenv("POSTGRES_PORT")
 
+	log.Println(user)
+	log.Println(dbname)
+	log.Println(port)
+
+	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		"postgres",
+		"postgres",
+		"postgres",
+		"5432",
+		"postgres")
+
 	if user == "" {
 		log.Fatalln("User not provided in .env file.")
 	} else if dbname == "" {
@@ -34,8 +45,9 @@ func EstablishDBConnection(clearData bool) {
 
 	db, err = sqlx.Connect(
 		"postgres",
-		fmt.Sprintf("user=%s dbname=%s port=%s sslmode=disable",
-			user, dbname, port))
+		url)
+	// fmt.Sprintf("postgres://%s:%s@%s:/%s?sslmode=disable",
+	// 	"joshthoo", "2100Isnotaleapyear!", "localhost", port))
 
 	if err != nil {
 		log.Fatalln(err)
