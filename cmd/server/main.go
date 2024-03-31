@@ -13,11 +13,28 @@ import (
 )
 
 func main() {
-	log.Println("Connecting to bot...")
-	err := godotenv.Load(".env")
+	godotenv.Load()
+	log.Println(os.LookupEnv("REMOTE_DEPLOY"))
+	remoteDeploy, err := strconv.ParseBool(os.Getenv("REMOTE_DEPLOY"))
 	if err != nil {
-		log.Fatalln("Error loading .env file")
+		log.Fatalln("environment variables improperly set up: ", err)
 	}
+
+	if remoteDeploy {
+		log.Println("Remote deployment of app started.")
+	} else {
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Fatalln("Failed to read off local .env variables: ", err)
+		}
+	}
+
+	log.Println("Connecting to bot...")
+	/*
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Fatalln("Error loading .env file")
+		}*/
 
 	token := os.Getenv("BOT_TOKEN")
 	if token == "" {
@@ -31,7 +48,14 @@ func main() {
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		log.Fatalf("Error creating bot: %v", err)
+		// prevent logs from exposing your bot token.
+		if err.Error()[0:4] == "Post" {
+			log.Fatalln(`Failed to connect to Telegram bot API. 
+			Check that you have entered the API key correctly,
+			and that you are connected to the internet.`)
+		} else {
+			log.Fatalf("Error creating bot: %v", err)
+		}
 	}
 	log.Println("Successfully connected!")
 
