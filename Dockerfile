@@ -70,8 +70,6 @@ USER appuser
 
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/server /bin/
-COPY .env .env
-
 
 # ENV BOT_TOKEN=exampleexample
 # ENV CLEAR_DATA=true

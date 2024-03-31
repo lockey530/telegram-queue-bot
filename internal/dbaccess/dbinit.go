@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -15,10 +14,11 @@ var db *sqlx.DB
 // Must be called before any interaction with the DB to initialize the db connection.
 func EstablishDBConnection(clearData bool) {
 	log.Println("Connecting to database...")
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalln("Error loading .env file")
-	}
+	/*
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Fatalln("Error loading .env file")
+		}*/
 
 	user := os.Getenv("POSTGRES_USER")
 	dbname := os.Getenv("POSTGRES_DBNAME")
@@ -43,7 +43,7 @@ func EstablishDBConnection(clearData bool) {
 		log.Fatalln("Port not provided in .env file.")
 	}
 
-	db, err = sqlx.Connect(
+	db, err := sqlx.Connect(
 		"postgres",
 		url)
 	// fmt.Sprintf("postgres://%s:%s@%s:/%s?sslmode=disable",
