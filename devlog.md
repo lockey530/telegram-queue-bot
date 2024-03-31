@@ -129,7 +129,9 @@ The solution was to clear out my volumes (which is Docker's term for persistent 
 
 ### 2: env files
 
-My go files read off a `.env` file, which I had to copy into the container with `COPY .env .env` within my Go Dockerfile. Additionally, I had to comment out `
+When containerzing, the environment changes (duh) and the environment variables are no longer as easily read. Looking through the proposed solutions in https://stackoverflow.com/questions/46917831/how-to-load-several-environment-variables-without-cluttering-the-dockerfile, I decided to go with copying the .env file directly into the image files. 
+My go files read off a `.env` file, which I had to copy into the container with `COPY .env .env` within my Go Dockerfile. Additionally, I had to comment out `**/.env` within `.dockerignore`. 
+
 
 :warning: Note: This is a small-scale project - using secrets stored in .env files is not the recommended way to keep your secrets since `.env` is in plaintext. If you happen to use this code for more high-value applications, you should definitely use a secrets manager. (but a lot of repos still use the .env file :eyes:)
 
@@ -191,7 +193,7 @@ secrets:
 
 Except - most cloud services for dynamic things do not support docker compose! There have been plans to consider Docker Compose in Railway, but it has not been implemented. I tried looking for free options around, but things like Google Cloud Run do not support Docker compose as well :( Looks like I spent a lot of time finding an un-useable solution!
 
-I had to scale back and throw away `compose.yaml` entirely. Thankfully, the solution in [#2](#2-env-files) still works. This solution also helped to avoid some of the pitfalls
+I had to scale back and throw away `compose.yaml` entirely. Thankfully, the solution in [#2](#2-env-files) still works. This solution also helped to avoid some of the pitfalls associated with args . (If you are advanced, you can consider the --secret option in https://stackoverflow.com/questions/45405212/safe-way-to-use-build-time-argument-in-docker/51921954#51921954 https://github.com/docker/cli/pull/1288, which I did not pursue.)
 
 ### 5: Secrets and env variables
 
