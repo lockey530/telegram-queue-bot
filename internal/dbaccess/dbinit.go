@@ -20,20 +20,23 @@ func EstablishDBConnection(clearData bool) {
 			log.Fatalln("Error loading .env file")
 		}*/
 
-	user := os.Getenv("POSTGRES_USER")
-	dbname := os.Getenv("POSTGRES_DBNAME")
-	port := os.Getenv("POSTGRES_PORT")
+	user := os.Getenv("PGUSER")
+	dbname := os.Getenv("PGDATABASE")
+	password := os.Getenv("PGPASSWORD")
+	port := os.Getenv("PGPORT")
+	host := os.Getenv("PGHOST")
 
 	log.Println(user)
 	log.Println(dbname)
+	log.Println(password)
 	log.Println(port)
 
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		"postgres",
-		"postgres",
-		"postgres",
-		"5432",
-		"postgres")
+		user,
+		password,
+		host,
+		port,
+		dbname)
 
 	if user == "" {
 		log.Fatalln("User not provided in .env file.")
