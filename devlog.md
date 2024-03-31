@@ -17,7 +17,10 @@ Creating this so that I will have an easier time developing Go stuff in the futu
   - [Docker Install and intro](#docker-install-and-intro)
   - [Docker setup issues](#docker-setup-issues)
     - [1: Volumes](#1-volumes)
-    - [2: Postgres connection within Docker](#2-postgres-connection-within-docker)
+    - [2: env files](#2-env-files)
+    - [3: Postgres connection within Docker](#3-postgres-connection-within-docker)
+    - [4: Nvm, ditch Docker Compose entirely](#4-nvm-ditch-docker-compose-entirely)
+    - [5: Secrets and env variables](#5-secrets-and-env-variables)
 
 
 # General Go Stuff
@@ -124,7 +127,15 @@ FATAL: role 'postgres' does not exist
 
 The solution was to clear out my volumes (which is Docker's term for persistent data tied to local files) using the `docker compose down --volumes` to clear off my persistent data. I will probably need to investigate a better solution that can avoid the need to wipe the volumes every time. (Interestingly, after a few runs of this, `docker compose down` now allows my container to work fine without the error.)
 
-### 2: Postgres connection within Docker
+### 2: env files
+
+When containerzing, the environment changes (duh) and the environment variables are no longer as easily read. Looking through the proposed solutions in https://stackoverflow.com/questions/46917831/how-to-load-several-environment-variables-without-cluttering-the-dockerfile, I decided to go with copying the .env file directly into the image files. 
+My go files read off a `.env` file, which I had to copy into the container with `COPY .env .env` within my Go Dockerfile. Additionally, I had to comment out `**/.env` within `.dockerignore`. 
+
+
+:warning: Note: This is a small-scale project - using secrets stored in .env files is not the recommended way to keep your secrets since `.env` is in plaintext. If you happen to use this code for more high-value applications, you should definitely use a secrets manager. (but a lot of repos still use the .env file :eyes:)
+
+### 3: Postgres connection within Docker
 
 First of all, always make sure that your db container is working first! When testing changes locally, make sure things are running in port 5432 (or the Postgres port of your choice).
 
@@ -148,7 +159,45 @@ The main issue is that the 1st connection method used the default `localhost` in
 
 Additionally, make sure that your Postgres instance at the port is running if you are testing this change! Faced a few minutes accidentally stuck in this.
 
-:warning: Note: This is a small-scale project - using secrets stored in .env files is not the recommended way to keep your secrets since `.env` is in plaintext. If you happen to use this code for more high-value applications, you should definitely use a secrets manager. (but a lot of repos still use the .env file :eyes:)
+The solution is an unholy mess of `postgres`es spammed in compose.yaml (including within the passwords file):
+
+```Dockerfile
+ db:
+    image: postgres
+    restart: always
+    user: postgres
+    container_name: postgres
+    secrets:
+      - db-password
+    # volumes:
+    #   - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      # - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    expose:
+      - 5432
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+# volumes:
+#   db-data:
+
+secrets:
+  db-password:
+    file: db/password.txt
+```
+### 4: Nvm, ditch Docker Compose entirely
+
+Except - most cloud services for dynamic things do not support docker compose! There have been plans to consider Docker Compose in Railway, but it has not been implemented. I tried looking for free options around, but things like Google Cloud Run do not support Docker compose as well :( Looks like I spent a lot of time finding an un-useable solution!
+
+I had to scale back and throw away `compose.yaml` entirely. Thankfully, the solution in [#2](#2-env-files) still works. This solution also helped to avoid some of the pitfalls associated with args . (If you are advanced, you can consider the --secret option in https://stackoverflow.com/questions/45405212/safe-way-to-use-build-time-argument-in-docker/51921954#51921954 https://github.com/docker/cli/pull/1288, which I did not pursue.)
+
+### 5: Secrets and env variables
+
+
 
 Then, further configure the compose.yaml and Dockerfiles based on documentation if required: https://docs.docker.com/reference/dockerfile/ https://docs.docker.com/compose/compose-file/?uuid=14e6d05b-8c4a-4389-b002-3e27079fd972%0A
 Lastly, store persistent data and stuff with volumes: https://docs.docker.com/storage/volumes/

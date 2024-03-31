@@ -69,9 +69,18 @@ RUN adduser \
 USER appuser
 
 # Copy the executable from the "build" stage.
-COPY .env .env
 COPY --from=build /bin/server /bin/
+COPY .env .env
 
+
+# ENV BOT_TOKEN=exampleexample
+# ENV CLEAR_DATA=true
+# ENV POSTGRES_USER=postgres
+# ENV REMOTE_DEPLOY=true
+# ENVPOSTGRES_DB=postgres
+# POSTGRES_DBNAME=postgres
+# POSTGRES_PORT=5432
+# POSTGRES_PASSWORD=postgres
 # Expose the port that the application listens on.
 EXPOSE 1248
 
