@@ -46,7 +46,9 @@ func EstablishDBConnection(clearData bool) {
 		log.Fatalln("Port not provided in .env file.")
 	}
 
-	db, err := sqlx.Connect(
+	// prevent db from being scoped locally - for package use.
+	var err error
+	db, err = sqlx.Connect(
 		"postgres",
 		url)
 	// fmt.Sprintf("postgres://%s:%s@%s:/%s?sslmode=disable",
@@ -72,14 +74,14 @@ func EstablishDBConnection(clearData bool) {
 	log.Printf("Database Name: %s\n", databaseName)
 	log.Printf("User Name: %s\n", userName)
 
-	initSchemaIfEmpty(db)
+	initSchemaIfEmpty()
 
 	if clearData {
-		removeDBEntries(db)
+		removeDBEntries()
 	}
 }
 
-func initSchemaIfEmpty(db *sqlx.DB) {
+func initSchemaIfEmpty() {
 	var tableExists bool
 
 	err := db.Get(&tableExists, checkExistenceQuery, "queue")

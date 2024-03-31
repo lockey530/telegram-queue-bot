@@ -13,6 +13,8 @@ import (
 )
 
 func main() {
+	// Per the documentation, this function will not override an env variable that already exists.
+	// Therefore, it is safe to run this code in both local and remote deployments.
 	godotenv.Load()
 	log.Println(os.LookupEnv("REMOTE_DEPLOY"))
 	remoteDeploy, err := strconv.ParseBool(os.Getenv("REMOTE_DEPLOY"))

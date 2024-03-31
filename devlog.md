@@ -6,6 +6,7 @@ Creating this so that I will have an easier time developing Go stuff in the futu
   - [Setting up your own packages](#setting-up-your-own-packages)
   - [Sub-packages](#sub-packages)
   - [Capitalization](#capitalization)
+  - [Postgres / sqlx](#postgres--sqlx)
 - [Telegram-specific](#telegram-specific)
   - [How to set up communications to your bot](#how-to-set-up-communications-to-your-bot)
   - [How to Hello World - listen for updates](#how-to-hello-world---listen-for-updates)
@@ -18,9 +19,11 @@ Creating this so that I will have an easier time developing Go stuff in the futu
   - [Docker setup issues](#docker-setup-issues)
     - [1: Volumes](#1-volumes)
     - [2: env files](#2-env-files)
-    - [3: Postgres connection within Docker](#3-postgres-connection-within-docker)
+    - [3: Postgres connection issues](#3-postgres-connection-issues)
     - [4: Nvm, ditch Docker Compose entirely](#4-nvm-ditch-docker-compose-entirely)
-    - [5: Secrets and env variables](#5-secrets-and-env-variables)
+    - [5: First light (Hacky)](#5-first-light-hacky)
+    - [6: Fixes](#6-fixes)
+    - [X: Secrets and env variables](#x-secrets-and-env-variables)
 
 
 # General Go Stuff
@@ -57,6 +60,10 @@ Unlike other languages like Python or JavaScript where relative imports are usea
 https://go.dev/tour/basics/3 
 - Golang has a peculiar way of marking things as shareable to external parties beyond your package - if your function or type stats with a lower letter case, it is private. If it starts with an upper case, it is public.
 - This is the reason why all functions and types that you use from external packages all start with an upper case.
+
+## Postgres / sqlx
+
+After some research, I decided on using the Postgres driver, `lib/pq`, along with `jmoiron/sqlx` to simplify the marshalling / unmarshalling of data between Go structs and SQL entries. Thankfully, these libraries are well documented, so I managed to get a hold of waht they do by reading their documentation and consulting tutorials as needed. 
 
 # Telegram-specific
 Uses github.com/go-telegram-bot-api/telegram-bot-api - module name of tgbotapi typically given.
@@ -135,7 +142,7 @@ My go files read off a `.env` file, which I had to copy into the container with 
 
 :warning: Note: This is a small-scale project - using secrets stored in .env files is not the recommended way to keep your secrets since `.env` is in plaintext. If you happen to use this code for more high-value applications, you should definitely use a secrets manager. (but a lot of repos still use the .env file :eyes:)
 
-### 3: Postgres connection within Docker
+### 3: Postgres connection issues
 
 First of all, always make sure that your db container is working first! When testing changes locally, make sure things are running in port 5432 (or the Postgres port of your choice).
 
@@ -195,7 +202,38 @@ Except - most cloud services for dynamic things do not support docker compose! T
 
 I had to scale back and throw away `compose.yaml` entirely. Thankfully, the solution in [#2](#2-env-files) still works. This solution also helped to avoid some of the pitfalls associated with args . (If you are advanced, you can consider the --secret option in https://stackoverflow.com/questions/45405212/safe-way-to-use-build-time-argument-in-docker/51921954#51921954 https://github.com/docker/cli/pull/1288, which I did not pursue.)
 
-### 5: Secrets and env variables
+### 5: First light (Hacky)
+
+The idea of Railway all this time was to visualize your images individually in a nice graphical format. We just had to set this up, with the Go repo connecting to Github for continuous deployment while the Postgres server was automatically booted up via the `New` button at the top right of the visualization.
+
+![alt text](images/railway_progress1.png)
+
+Next up, I removed the hard-coded `postgres` spam glory, reverting back to the use of environment variables which were used to connect to the Postgres database with the following:
+```Go
+	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		user,
+		password,
+		host,
+		port,
+		dbname)
+```
+
+I faced the following 2 issues when my dockerfiles were run by Railway. I got rid of both of these issues within the Dockerfile with bandaid fix (to be fixed).
+
+`Cache mounts MUST be in the format --mount=type=cache,id=<cache-id>` - comment out all cache-based commands in Dockerfile.
+
+`ERROR: failed to solve: failed to compute cache key: failed to calculate checksum of ref (some SHA256 key): "/.env": not found` - Remove .env copying. Instead, test un-containerized code using a simple `go run cmd/server/main.go`, while dumping environment variables directly into Railway with the RAW editor to test the containerized version of the code in remote deployment.
+
+Afterwards, I utilized the fields `PGUSER`, `PGPASSWORD`, `PGHOST`, `PGPORT`, and `PGDATABASE` that Railway provided within the service variables in Railway, linking it up into my Golang code using reference variables (see https://docs.railway.app/guides/variables#reference-variables). For now, I also additionally fed it into my local .env files for ease of use (I will clear up the remote/local deployment process later on.)
+
+![alt text](images/railway_progress2.png)
+
+![alt text](images/railway_progress3.png)
+
+### 6: Fixes
+
+
+### X: Secrets and env variables
 
 
 

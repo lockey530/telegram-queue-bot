@@ -32,5 +32,3 @@ const checkExistenceQuery string = `
 		AND    	tablename  = $1
 		);
 `
-
-const wipeData string = "TRUNCATE queue, admins"
