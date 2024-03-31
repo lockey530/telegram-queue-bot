@@ -84,7 +84,7 @@ func EstablishDBConnection(clearData bool) {
 func initSchemaIfEmpty() {
 	var tableExists bool
 
-	err := db.Get(&tableExists, checkExistenceQuery, "queue")
+	err := db.Get(&tableExists, checkTableExistenceQuery, "queue")
 	if err != nil {
 		log.Fatal("Error retrieving connection information:", err)
 	}
@@ -92,13 +92,11 @@ func initSchemaIfEmpty() {
 	if !tableExists {
 		db.MustExec(queueSchema)
 		log.Println("schema initiated for the queue.")
-		db.MustExec(adminSchema)
-		log.Println("Schema initiated for admins.")
 	} else {
-		log.Println("users schema already initiated.")
+		log.Println("queue schema already initiated.")
 	}
 
-	err = db.Get(&tableExists, checkExistenceQuery, "admins")
+	err = db.Get(&tableExists, checkTableExistenceQuery, "admins")
 	if err != nil {
 		log.Fatal("Error retrieving connection information:", err)
 	}

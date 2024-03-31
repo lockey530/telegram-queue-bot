@@ -1,8 +1,8 @@
 package dbaccess
 
 type QueueUser struct {
-	queueID    uint64 `db:"queue_id" note:"Postgres-generated identifier"`
-	userHandle string `db:"user_handle" note:"Refers to the Telegram handle"`
+	QueueID    uint64 `db:"queue_id" note:"Postgres-generated identifier"`
+	UserHandle string `db:"user_handle" note:"Refers to the Telegram handle"`
 }
 
 const queueSchema string = `
@@ -13,8 +13,8 @@ const queueSchema string = `
 `
 
 type AdminUser struct {
-	adminID     uint64 `db:"admin_id" note:"Postgres-generated identifier"`
-	adminHandle string `db:"admin_handle" note:"Refers to the Telegram handle"`
+	AdminID     uint64 `db:"admin_id" note:"Postgres-generated identifier"`
+	AdminHandle string `db:"admin_handle" note:"Refers to the Telegram handle"`
 }
 
 const adminSchema string = `
@@ -25,7 +25,7 @@ const adminSchema string = `
 `
 
 // https://stackoverflow.com/questions/20582500/how-to-check-if-a-table-exists-in-a-given-schema
-const checkExistenceQuery string = `
+const checkTableExistenceQuery string = `
 	SELECT EXISTS (
 		SELECT FROM pg_tables
 		WHERE  	schemaname = 'public'

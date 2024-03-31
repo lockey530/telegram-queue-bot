@@ -7,6 +7,7 @@ Creating this so that I will have an easier time developing Go stuff in the futu
   - [Sub-packages](#sub-packages)
   - [Capitalization](#capitalization)
   - [Postgres / sqlx](#postgres--sqlx)
+  - [go build](#go-build)
 - [Telegram-specific](#telegram-specific)
   - [How to set up communications to your bot](#how-to-set-up-communications-to-your-bot)
   - [How to Hello World - listen for updates](#how-to-hello-world---listen-for-updates)
@@ -63,7 +64,25 @@ https://go.dev/tour/basics/3
 
 ## Postgres / sqlx
 
-After some research, I decided on using the Postgres driver, `lib/pq`, along with `jmoiron/sqlx` to simplify the marshalling / unmarshalling of data between Go structs and SQL entries. Thankfully, these libraries are well documented, so I managed to get a hold of waht they do by reading their documentation and consulting tutorials as needed. 
+After some research, I decided on using the Postgres driver, `lib/pq`, along with `jmoiron/sqlx` to simplify the marshalling / unmarshalling of data between Go structs and SQL entries. Thankfully, these libraries are well documented, so I managed to get a hold of waht they do by reading their documentation and consulting tutorials as needed.
+
+Be careful and remember capitalization! The sql driver will need the fields in your struct to be public (i.e. capitalized) before it can marshall into them. I spent a thankful short 10 mins on this.
+
+Additionally, as I used a SERIAL PRIMARY KEY for auto-incrementing my queue, I also had to reset my serialization within my WIPE_DATA command with `TRUNCATE TABLE queue RESTART IDENTITY` - solution identified in https://stackoverflow.com/questions/3819292/reset-postgresql-primary-key-to-1. Alternatively, a less destructive method is noted, but requires you to name your serial field as `id` or something with no underscores - `ALTER SEQUENCE queue_id_seq RESTART WITH 1`.
+
+To check how many rows were deleted, I used the Postgres driver to get the number of rows, which helped to check if the deletion was correct.
+```Go
+	result, err := db.Exec(`DELETE FROM queue WHERE user_handle = $1;`, userHandle)
+	if err != nil {
+		return fmt.Errorf("failed to leave queue. %v", err)
+	}
+	log.Println(result.RowsAffected())
+```
+A more generalizable solution is found in https://stackoverflow.com/questions/2251567/how-to-get-the-number-of-deleted-rows-in-postgresql
+
+## go build
+
+`go build -o <binary-name> ./...` into a binary at the root folder will not work as intended in this repository as it has no Go files within the root repository. Instead, you would need to throw this folder into a separate repository, for example, the folder `server`. The binary would then be save-able as `go build -o server ./...`. Of course, you should stick with the simple `go mod cmd/server/main.go` for development.
 
 # Telegram-specific
 Uses github.com/go-telegram-bot-api/telegram-bot-api - module name of tgbotapi typically given.

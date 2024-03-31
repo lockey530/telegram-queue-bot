@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/josh1248/nusc-queue-bot/internal/commandtypes"
@@ -23,6 +24,11 @@ var AvailableCommands = []commandtypes.AcceptedCommands{
 		Command:     "leave",
 		Description: "Leave the virtual queue for the photobooth.",
 		Handler:     LeaveCommand,
+	},
+	{
+		Command:     "seequeue",
+		Description: "DEBUG ONLY (transfer to admins later): see the contents of the queue now.",
+		Handler:     SeeQueueCommand,
 	},
 	{
 		Command:     "howlong",
@@ -69,7 +75,7 @@ func HelpCommand(userMessage tgbotapi.Update) (feedback string) {
 
 	/leave - leave the photobooth queue if you have previously joined.
 
-	(dk) /wait - need some time? place yourself 5 slots behind the queue (1-time only).
+	/wait - (Not supported yet) need some time? place yourself 5 slots behind the queue (1-time only).
 
 	/help or /start - see this message again.
 
@@ -84,17 +90,42 @@ func GreetCommand(userMessage tgbotapi.Update) (feedback string) {
 
 func JoinCommand(userMessage tgbotapi.Update) (feedback string) {
 	err := dbaccess.JoinQueue(userMessage.SentFrom().UserName)
+
 	if err != nil {
-		feedback = "You were unable to join the queue due to an unexpected error :("
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			feedback = "You have already joined this queue!"
+		} else {
+			feedback = "You were unable to join the queue due to an unexpected error :("
+		}
 		log.Println(err)
+	} else {
+		feedback = "Joined the queue..."
 	}
 
-	feedback = "Joined the queue..."
 	return feedback
 }
 
 func LeaveCommand(userMessage tgbotapi.Update) (feedback string) {
-	feedback = "Left the queue..."
+	err := dbaccess.LeaveQueue(userMessage.SentFrom().UserName)
+	if err != nil {
+		if strings.Contains(err.Error(), "user not in queue") {
+			feedback = "It seems you have not joined this queue yet!"
+		} else {
+			feedback = "You were unable to leave the queue due to an unexpected error :("
+		}
+		log.Println(err)
+	} else {
+		feedback = "Left the queue..."
+	}
+	return feedback
+}
+
+func SeeQueueCommand(userMessage tgbotapi.Update) (feedback string) {
+	feedback, err := dbaccess.CheckQueue()
+	if err != nil {
+		feedback = "Something went wrong when accessing the queue... blame @joshtwo."
+		log.Println(err)
+	}
 	return feedback
 }
 
