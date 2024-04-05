@@ -92,7 +92,8 @@ func main() {
 		if update.Message == nil {
 			continue
 		}
-		replyMessage := controllers.ReceiveCommand(update)
+
+		replyMessage := controllers.ReceiveCommand(update, bot)
 		_, err := bot.Send(replyMessage)
 		if err != nil {
 			log.Printf("Error sending message %s\n", err)

@@ -7,5 +7,5 @@ import (
 type AcceptedCommands struct {
 	Command     string
 	Description string
-	Handler     func(userMessage tgbotapi.Update) (feedback string)
+	Handler     func(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string)
 }

@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -27,8 +28,18 @@ var AvailableCommands = []commandtypes.AcceptedCommands{
 	},
 	{
 		Command:     "seequeue",
-		Description: "DEBUG ONLY (transfer to admins later): see the contents of the queue now.",
+		Description: "(admins only - check this): see the contents of the queue now.",
 		Handler:     SeeQueueCommand,
+	},
+	{
+		Command:     "ping",
+		Description: "(admins only - check this): send a reminder to the first person in queue.",
+		Handler:     PingCommand,
+	},
+	{
+		Command:     "kick",
+		Description: "(admins only - check this): remove the person at some set position",
+		Handler:     KickCommand,
 	},
 	{
 		Command:     "howlong",
@@ -52,22 +63,22 @@ var AvailableCommands = []commandtypes.AcceptedCommands{
 	},
 }
 
-func NonTextHandler(userMessage tgbotapi.Update) (feedback string) {
+func NonTextHandler(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	feedback = "I don't know what this is :( please send me text commands!"
 	return feedback
 }
 
-func NonCommandHandler(userMessage tgbotapi.Update) (feedback string) {
+func NonCommandHandler(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	feedback = "Please input a command which starts with '/', like /start"
 	return feedback
 }
 
-func InvalidCommand(userMessage tgbotapi.Update) (feedback string) {
+func InvalidCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	feedback = "Sorry, I don't recognize your command :("
 	return feedback
 }
 
-func HelpCommand(userMessage tgbotapi.Update) (feedback string) {
+func HelpCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	return `
 	Welcome to the queue bot~
 
@@ -83,13 +94,13 @@ func HelpCommand(userMessage tgbotapi.Update) (feedback string) {
 	`
 }
 
-func GreetCommand(userMessage tgbotapi.Update) (feedback string) {
+func GreetCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	feedback = fmt.Sprintf("Hi %s, hope your day went well!", userMessage.SentFrom().FirstName)
 	return feedback
 }
 
-func JoinCommand(userMessage tgbotapi.Update) (feedback string) {
-	err := dbaccess.JoinQueue(userMessage.SentFrom().UserName)
+func JoinCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
+	err := dbaccess.JoinQueue(userMessage)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
@@ -105,7 +116,7 @@ func JoinCommand(userMessage tgbotapi.Update) (feedback string) {
 	return feedback
 }
 
-func LeaveCommand(userMessage tgbotapi.Update) (feedback string) {
+func LeaveCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	err := dbaccess.LeaveQueue(userMessage.SentFrom().UserName)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not in queue") {
@@ -120,7 +131,7 @@ func LeaveCommand(userMessage tgbotapi.Update) (feedback string) {
 	return feedback
 }
 
-func SeeQueueCommand(userMessage tgbotapi.Update) (feedback string) {
+func SeeQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	feedback, err := dbaccess.CheckQueue()
 	if err != nil {
 		feedback = "Something went wrong when accessing the queue... blame @joshtwo."
@@ -129,7 +140,59 @@ func SeeQueueCommand(userMessage tgbotapi.Update) (feedback string) {
 	return feedback
 }
 
-func HowLongCommand(userMessage tgbotapi.Update) (feedback string) {
+func HowLongCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	feedback = "Very, very long."
+	return feedback
+}
+
+func KickCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
+	if len(userMessage.Message.Text) < 6 {
+		feedback = "input the position to kick the person at."
+		return feedback
+	}
+	kickPosition, err := strconv.Atoi(userMessage.Message.Text[6:])
+	if err != nil {
+		feedback = "did not submit text."
+		log.Println(err)
+		return feedback
+	}
+
+	chatID, err := dbaccess.KickPerson(int64(kickPosition))
+	if err != nil {
+		feedback = "You failed to kick the first person: " + err.Error()
+		log.Printf("Error sending message %v\n", err)
+		return feedback
+	}
+
+	msg := tgbotapi.NewMessage(chatID, "You have been kicked from the queue.")
+	_, err = bot.Send(msg)
+	if err != nil {
+		feedback = "You failed to kick the first person: " + err.Error()
+		log.Printf("Error sending message %v\n", err)
+		return feedback
+	}
+
+	feedback = "First person in queue kicked and notified"
+	return feedback
+}
+
+// Indirectly called handlers
+func PingCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
+	chatID, err := dbaccess.NotifyQueue(1)
+	if err != nil {
+		feedback = "You failed to kick the first person: " + err.Error()
+		log.Printf("Error sending message %v\n", err)
+		return feedback
+	}
+
+	msg := tgbotapi.NewMessage(chatID, "Hey, you are the first person in queue! get moving :D")
+	_, err = bot.Send(msg)
+	if err != nil {
+		feedback = "You failed to kick the first person: " + err.Error()
+		log.Printf("Error sending message %v\n", err)
+		return feedback
+	}
+
+	feedback = "First person in queue notified."
 	return feedback
 }
