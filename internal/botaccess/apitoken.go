@@ -1,45 +1,22 @@
-package apitoken
+package botaccess
 
 import (
+	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )
 
-var initialized bool = false
 var botAPI *tgbotapi.BotAPI
 
-// This function should be initialized in the main function before use in subsequent areas,
-// which can call this function to retrieve the bot token.
-// implicit .env function arguments during setup: remote_deploy, bot_token.
-func GetBotAPIToken() *tgbotapi.BotAPI {
-	if initialized {
-		return botAPI
-	}
-
-	var err error
-
+// implicit .env arguments: BOT_TOKEN.
+func InitializeBotAPIConnection() *tgbotapi.BotAPI {
 	// Per the documentation, this function will not override an env variable that already exists.
 	// Therefore, it is safe to run this code in both local and remote deployments.
 	godotenv.Load()
-	log.Println(os.LookupEnv("REMOTE_DEPLOY"))
-	remoteDeploy, err := strconv.ParseBool(os.Getenv("REMOTE_DEPLOY"))
-	if err != nil {
-		log.Fatalln("environment variables improperly set up: ", err)
-	}
-
-	if remoteDeploy {
-		log.Println("Remote deployment of app started.")
-	} else {
-		err = godotenv.Load(".env")
-		if err != nil {
-			log.Fatalln("Failed to read off local .env variables: ", err)
-		}
-	}
 
 	log.Println("Connecting to bot...")
 
@@ -53,6 +30,7 @@ func GetBotAPIToken() *tgbotapi.BotAPI {
 			3. Replace (your bot API here) with the Telegram API token given in @BotFather.`)
 	}
 
+	var err error
 	botAPI, err = tgbotapi.NewBotAPI(token)
 	if err != nil {
 		if strings.Contains(err.Error(), token) {
@@ -65,6 +43,13 @@ func GetBotAPIToken() *tgbotapi.BotAPI {
 	}
 	log.Println("Successfully connected!")
 
-	initialized = true
 	return botAPI
+}
+
+func GetBotAPIConnection() (*tgbotapi.BotAPI, error) {
+	if botAPI == nil {
+		return nil, fmt.Errorf("retrieval of un-initialized bot API")
+	}
+
+	return botAPI, nil
 }

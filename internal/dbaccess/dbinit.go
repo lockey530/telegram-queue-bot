@@ -12,6 +12,7 @@ import (
 var db *sqlx.DB
 
 // Must be called before any interaction with the DB to initialize the db connection.
+// implicit .env arguments: clearData.
 func EstablishDBConnection(clearData bool) {
 	log.Println("Connecting to database...")
 	/*

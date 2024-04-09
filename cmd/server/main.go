@@ -7,14 +7,14 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
-	"github.com/josh1248/nusc-queue-bot/internal/apitoken"
+	"github.com/josh1248/nusc-queue-bot/internal/botaccess"
 	"github.com/josh1248/nusc-queue-bot/internal/controllers"
 	"github.com/josh1248/nusc-queue-bot/internal/dbaccess"
 	"github.com/josh1248/nusc-queue-bot/internal/handlers"
 )
 
 func main() {
-	bot := apitoken.GetBotAPIToken()
+	bot := botaccess.InitializeBotAPIConnection()
 
 	menuOptions := make([]tgbotapi.BotCommand, len(handlers.AvailableCommands))
 	for i, command := range handlers.AvailableCommands {
@@ -47,14 +47,6 @@ func main() {
 	log.Println("Listening for incoming messages...")
 
 	for update := range updates {
-		if update.Message == nil {
-			continue
-		}
-
-		replyMessage := controllers.ReceiveCommand(update, bot)
-		_, err := bot.Send(replyMessage)
-		if err != nil {
-			log.Printf("Error sending message %s\n", err)
-		}
+		controllers.ReceiveCommand(update, bot)
 	}
 }

@@ -132,7 +132,7 @@ func LeaveCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback s
 }
 
 func SeeQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	feedback, err := dbaccess.CheckQueue()
+	feedback, err := dbaccess.CheckQueueContents()
 	if err != nil {
 		feedback = "Something went wrong when accessing the queue... blame @joshtwo."
 		log.Println(err)
@@ -140,8 +140,23 @@ func SeeQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedbac
 	return feedback
 }
 
+// To update: should be variable based on whether you have joined the queue.
 func HowLongCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	feedback = "Very, very long."
+	queueLength, err := dbaccess.CheckQueueLength()
+	if err != nil {
+		feedback = "Something went wrong when accessing the queue... blame @joshtwo."
+		log.Println(err)
+		return feedback
+	}
+
+	var info string
+	if queueLength == 1 {
+		info = fmt.Sprintf("%s %d %s", "is", queueLength, "group")
+	} else {
+		info = fmt.Sprintf("%s %d %s", "are", queueLength, "groups")
+	}
+
+	feedback = fmt.Sprintf("There %s in the queue now.", info)
 	return feedback
 }
 
@@ -181,7 +196,7 @@ func PingCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback st
 	chatID, err := dbaccess.NotifyQueue(1)
 	if err != nil {
 		feedback = "You failed to kick the first person: " + err.Error()
-		log.Printf("Error sending message %v\n", err)
+		log.Printf("Error sending message, %v\n", err)
 		return feedback
 	}
 

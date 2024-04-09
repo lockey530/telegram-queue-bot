@@ -8,7 +8,7 @@ import (
 
 func JoinQueue(user tgbotapi.Update) error {
 	tx := db.MustBegin()
-	_, err := tx.Exec("INSERT INTO queue (user_handle, chat_id) VALUES ($1, $2)",
+	_, err := tx.Exec("INSERT INTO queue (user_handle, chat_id) VALUES ($1, $2);",
 		user.SentFrom().UserName, user.SentFrom().ID)
 
 	if err != nil {
@@ -22,14 +22,24 @@ func JoinQueue(user tgbotapi.Update) error {
 	return nil
 }
 
-// wrapper or monad time?
-func CheckQueue() (string, error) {
+func CheckQueueContents() (string, error) {
 	queue := []QueueUser{}
-	if err := db.Select(&queue, "SELECT * FROM queue"); err != nil {
+	if err := db.Select(&queue, "SELECT * FROM queue;"); err != nil {
 		return "", fmt.Errorf("failed to get queue state. %v", err)
 	}
 
 	return fmt.Sprintf("%v", queue), nil
+}
+
+func CheckQueueLength() (int, error) {
+	var queueLength int
+	// https://wiki.postgresql.org/wiki/Count_estimate for the method which requires ANALYZE
+	// but can be faster.
+	if err := db.Get(&queueLength, "SELECT count(*) FROM queue;"); err != nil {
+		return -1, fmt.Errorf("failed to get queue state. %v", err)
+	}
+
+	return queueLength, nil
 }
 
 func LeaveQueue(userHandle string) error {
@@ -48,10 +58,10 @@ func LeaveQueue(userHandle string) error {
 	return nil
 }
 
+// retrieves the
 func NotifyQueue(position int64) (chatID int64, err error) {
 	user := QueueUser{}
-	// change this if select query is no longer guaranteed to return 1 row.
-	if err := db.Get(&user, "SELECT (chat_id) FROM queue ORDER BY joined_at"); err != nil {
+	if err := db.Get(&user, "SELECT (chat_id) FROM queue ORDER BY joined_at OFFSET $1 LIMIT 1;", position); err != nil {
 		return 0, fmt.Errorf("failed to get first user in queue: %v", err)
 	}
 
