@@ -9,6 +9,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/josh1248/nusc-queue-bot/internal/commandtypes"
 	"github.com/josh1248/nusc-queue-bot/internal/dbaccess"
+	"github.com/josh1248/nusc-queue-bot/internal/userfeedback"
 )
 
 // Command and description is hard-coded within the HelpFunction for circular dependencies.
@@ -64,34 +65,37 @@ var AvailableCommands = []commandtypes.AcceptedCommands{
 }
 
 func NonTextHandler(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	feedback = "I don't know what this is :( please send me text commands!"
-	return feedback
+	return userfeedback.NonTextFeedback
 }
+
+const nonCommandFeedback string = "Please input a command which starts with '/', like /start"
 
 func NonCommandHandler(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	feedback = "Please input a command which starts with '/', like /start"
-	return feedback
+	return nonCommandFeedback
 }
+
+const invalidCommandFeedback string = "Sorry, I don't recognize your command :("
 
 func InvalidCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	feedback = "Sorry, I don't recognize your command :("
-	return feedback
+	return invalidCommandFeedback
 }
 
+const helpFeepback string = `
+Welcome to the queue bot~
+
+/join - join the photobooth queue!
+
+/leave - leave the photobooth queue if you have previously joined.
+
+/wait - (Not supported yet) need some time? place yourself 5 slots behind the queue (1-time only).
+
+/help or /start - see this message again.
+
+For more options, check out the 'Menu' button at the bottom left of this chat!
+`
+
 func HelpCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	return `
-	Welcome to the queue bot~
-
-	/join - join the photobooth queue!
-
-	/leave - leave the photobooth queue if you have previously joined.
-
-	/wait - (Not supported yet) need some time? place yourself 5 slots behind the queue (1-time only).
-
-	/help or /start - see this message again.
-
-	For more options, check out the 'Menu' button at the bottom left of this chat!
-	`
+	return helpFeepback
 }
 
 func GreetCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
