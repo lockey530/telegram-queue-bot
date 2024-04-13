@@ -12,8 +12,7 @@ import (
 var db *sqlx.DB
 
 // Must be called before any interaction with the DB to initialize the db connection.
-// implicit .env arguments: clearData.
-func EstablishDBConnection(clearData bool) {
+func EstablishDBConnection(toReset bool) {
 	log.Println("Connecting to database...")
 	/*
 		err := godotenv.Load(".env")
@@ -75,11 +74,10 @@ func EstablishDBConnection(clearData bool) {
 	log.Printf("Database Name: %s\n", databaseName)
 	log.Printf("User Name: %s\n", userName)
 
-	initSchemaIfEmpty()
-
-	if clearData {
-		removeDBEntries()
+	if toReset {
+		dropDB()
 	}
+	initSchemaIfEmpty()
 }
 
 func initSchemaIfEmpty() {
@@ -92,6 +90,7 @@ func initSchemaIfEmpty() {
 
 	if !tableExists {
 		db.MustExec(queueSchema)
+		db.MustExec(indexQueueSchema)
 		log.Println("schema initiated for the queue.")
 	} else {
 		log.Println("queue schema already initiated.")
@@ -104,7 +103,7 @@ func initSchemaIfEmpty() {
 
 	if !tableExists {
 		db.MustExec(adminSchema)
-		log.Println("Schema initiated for admins.")
+		log.Println("schema initiated for admins.")
 	} else {
 		log.Println("admin schema already initiated.")
 	}

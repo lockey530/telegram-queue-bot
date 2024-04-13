@@ -18,8 +18,10 @@ const queueSchema string = `
 	);
 `
 
+const indexQueueSchema string = "CREATE INDEX user_handle ON queue (user_handle);"
+
 type AdminUser struct {
-	AdminID     uint64 `db:"admin_id" note:"Telegram handle chat ID?"`
+	AdminID     uint64 `db:"admin_id" note:"serial count"`
 	AdminHandle string `db:"admin_handle" note:"Refers to the Telegram handle"`
 }
 

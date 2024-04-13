@@ -31,15 +31,34 @@ func CheckQueueContents() (string, error) {
 	return fmt.Sprintf("%v", queue), nil
 }
 
-func CheckQueueLength() (int, error) {
+func CheckIfInQueue(userHandle string) (bool, error) {
+	var isInQueue bool
+
+	fmt.Println(userHandle)
+	if err := db.Get(&isInQueue, "SELECT EXISTS (SELECT 1 FROM queue WHERE user_handle = $1);", userHandle); err != nil {
+		return false, fmt.Errorf("failed to get queue state. %v", err)
+	}
+
+	return isInQueue, nil
+}
+
+func CheckQueueLength(userHandle string) (bool, int, error) {
+	isInQueue, err := CheckIfInQueue(userHandle)
+	if err != nil {
+		return isInQueue, -1, fmt.Errorf("failed to get queue state. %v", err)
+	}
+
 	var queueLength int
 	// https://wiki.postgresql.org/wiki/Count_estimate for the method which requires ANALYZE
 	// but can be faster.
-	if err := db.Get(&queueLength, "SELECT count(*) FROM queue;"); err != nil {
-		return -1, fmt.Errorf("failed to get queue state. %v", err)
+	if isInQueue {
+		// update this
+		err = db.Get(&queueLength, "SELECT count(*) FROM queue;")
+	} else {
+		err = db.Get(&queueLength, "SELECT count(*) FROM queue;")
 	}
 
-	return queueLength, nil
+	return isInQueue, queueLength, err
 }
 
 func LeaveQueue(userHandle string) error {
@@ -58,7 +77,6 @@ func LeaveQueue(userHandle string) error {
 	return nil
 }
 
-// retrieves the
 func NotifyQueue(position int64) (chatID int64, err error) {
 	user := QueueUser{}
 	if err := db.Get(&user, "SELECT (chat_id) FROM queue ORDER BY joined_at OFFSET $1 LIMIT 1;", position); err != nil {

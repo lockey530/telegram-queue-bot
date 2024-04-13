@@ -53,11 +53,6 @@ var AvailableCommands = []commandtypes.AcceptedCommands{
 		Handler:     HelpCommand,
 	},
 	{
-		Command:     "greet",
-		Description: "The bot is friendly :)",
-		Handler:     GreetCommand,
-	},
-	{
 		Command:     "start",
 		Description: "Explains the main functionalities of the bot.",
 		Handler:     HelpCommand,
@@ -87,20 +82,13 @@ Welcome to the queue bot~
 
 /leave - leave the photobooth queue if you have previously joined.
 
-/wait - (Not supported yet) need some time? place yourself 5 slots behind the queue (1-time only).
-
-/help or /start - see this message again.
+/howlong - check how many people are in front of you.
 
 For more options, check out the 'Menu' button at the bottom left of this chat!
 `
 
 func HelpCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	return helpFeepback
-}
-
-func GreetCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	feedback = fmt.Sprintf("Hi %s, hope your day went well!", userMessage.SentFrom().FirstName)
-	return feedback
 }
 
 func JoinCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
@@ -146,7 +134,7 @@ func SeeQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedbac
 
 // To update: should be variable based on whether you have joined the queue.
 func HowLongCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	queueLength, err := dbaccess.CheckQueueLength()
+	isInQueue, queueLength, err := dbaccess.CheckQueueLength(userMessage.SentFrom().UserName)
 	if err != nil {
 		feedback = "Something went wrong when accessing the queue... blame @joshtwo."
 		log.Println(err)
@@ -160,7 +148,11 @@ func HowLongCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback
 		info = fmt.Sprintf("%s %d %s", "are", queueLength, "groups")
 	}
 
-	feedback = fmt.Sprintf("There %s in the queue now.", info)
+	if isInQueue {
+		feedback = fmt.Sprintf("There %s in front of you now.", info)
+	} else {
+		feedback = fmt.Sprintf("There %s total in the queue now.", info)
+	}
 	return feedback
 }
 

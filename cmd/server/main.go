@@ -30,9 +30,9 @@ func main() {
 	godotenv.Load()
 
 	log.Println("Checking if db data is to be cleared...")
-	tmp := os.Getenv("CLEAR_DATA")
+	tmp := os.Getenv("RESET_DB")
 	if tmp == "" {
-		log.Fatalln("Could not read CLEAR_DATA info from .env")
+		log.Fatalln("Could not read RESET_DB info from .env")
 	}
 
 	toClearData, err := strconv.ParseBool(tmp)
