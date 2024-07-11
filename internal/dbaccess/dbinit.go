@@ -20,9 +20,9 @@ func EstablishDBConnection(toReset bool) {
 			log.Fatalln("Error loading .env file")
 		}*/
 
-	user := os.Getenv("PGUSER")
-	dbname := os.Getenv("PGDATABASE")
-	password := os.Getenv("PGPASSWORD")
+	user := os.Getenv("POSTGRES_USER")
+	dbname := os.Getenv("POSTGRES_DB")
+	password := os.Getenv("POSTGRES_PASSWORD")
 	port := os.Getenv("PGPORT")
 	host := os.Getenv("PGHOST")
 
@@ -51,8 +51,6 @@ func EstablishDBConnection(toReset bool) {
 	db, err = sqlx.Connect(
 		"postgres",
 		url)
-	// fmt.Sprintf("postgres://%s:%s@%s:/%s?sslmode=disable",
-	// 	"joshthoo", "2100Isnotaleapyear!", "localhost", port))
 
 	if err != nil {
 		log.Fatalln(err)
