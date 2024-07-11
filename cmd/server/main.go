@@ -13,21 +13,10 @@ import (
 )
 
 func main() {
-	bot := botaccess.InitializeBotAPIConnection()
-
-	menuOptions := make([]tgbotapi.BotCommand, len(botaccess.AvailableCommands))
-	for i, command := range botaccess.AvailableCommands {
-		menuOptions[i] = tgbotapi.BotCommand{Command: command.Command, Description: command.Description}
-	}
-	menu := tgbotapi.NewSetMyCommands(menuOptions...)
-	bot.Send(menu)
-
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
 	godotenv.Load()
 
-	log.Println("Checking if db data is to be cleared...")
+	bot := botaccess.InitializeBotAPIConnection()
+
 	tmp := os.Getenv("RESET_DB")
 	if tmp == "" {
 		log.Fatalln("Could not read RESET_DB info from .env")
@@ -40,6 +29,16 @@ func main() {
 
 	log.Printf("Check done, CLEAR_DATA=%t", toClearData)
 	dbaccess.EstablishDBConnection(toClearData)
+
+	menuOptions := make([]tgbotapi.BotCommand, len(botaccess.UserCommands))
+	for i, command := range botaccess.UserCommands {
+		menuOptions[i] = tgbotapi.BotCommand{Command: command.Command, Description: command.Description}
+	}
+	menu := tgbotapi.NewSetMyCommands(menuOptions...)
+	bot.Send(menu)
+
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
 
 	updates := bot.GetUpdatesChan(u)
 	log.Println("Listening for incoming messages...")

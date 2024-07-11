@@ -1,5 +1,6 @@
 BOT_TOKEN=(your bot API here)
-RESET_DB=(boolean: wipes data regarding the queue bot if needed - use during testing to clear junk data, and turn off otherwise.)
+RESET_DB=(boolean: wipes data regarding the queue bot if needed - 'true' during testing to clear junk data, 'false' otherwise.)
+BASE_ADMIN_ACCOUNT=(place the person that is to be the first admin of the bot. If your handle is @abc, type abc without the @.)
 
 # Postgres access details
 ## named to allow remote deployment override

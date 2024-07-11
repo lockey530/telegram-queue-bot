@@ -3,15 +3,13 @@ package dbaccess
 import (
 	"fmt"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	types "github.com/josh1248/nusc-queue-bot/internal/types"
 )
 
-func JoinQueue(user tgbotapi.Update) error {
+func JoinQueue(username string, chatID int64) error {
 	tx := db.MustBegin()
 	_, err := tx.Exec("INSERT INTO queue (user_handle, chat_id) VALUES ($1, $2);",
-		user.SentFrom().UserName, user.SentFrom().ID)
-
+		username, chatID)
 	if err != nil {
 		return fmt.Errorf("insertion query failed to execute. %v", err)
 	}
@@ -19,17 +17,16 @@ func JoinQueue(user tgbotapi.Update) error {
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("transaction for insertion failed to commit. %v", err)
 	}
-
 	return nil
 }
 
-func CheckQueueContents() (string, error) {
+func CheckQueueContents() ([]types.QueueUser, error) {
 	queue := []types.QueueUser{}
 	if err := db.Select(&queue, "SELECT * FROM queue;"); err != nil {
-		return "", fmt.Errorf("failed to get queue state. %v", err)
+		return nil, fmt.Errorf("failed to get queue state. %v", err)
 	}
 
-	return fmt.Sprintf("%v", queue), nil
+	return queue, nil
 }
 
 func CheckIfInQueue(userHandle string) (bool, error) {
@@ -85,22 +82,4 @@ func NotifyQueue(position int64) (chatID int64, err error) {
 	}
 
 	return user.ChatID, nil
-}
-
-// Kick a person with a Telegram handle.
-// Returns a chatID for further communications.
-func KickPerson(telegramHandle string) (chatID int64, err error) {
-	// this will need to be adjusted after implementing the waiting feature.
-	var chat []int64
-	err = db.Select(&chat, `
-		DELETE FROM queue 
-		WHERE user_handle = $1
-		RETURNING chat_id;
-	`, telegramHandle[1:])
-	if err != nil {
-		return 0, fmt.Errorf("failed to kick @%v. %v", telegramHandle, err)
-	}
-	chatID = chat[0]
-
-	return chatID, nil
 }

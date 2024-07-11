@@ -102,4 +102,16 @@ func initSchemaIfEmpty() {
 	} else {
 		log.Println("admin schema already initiated.")
 	}
+
+	_, err = db.Exec(`
+		INSERT INTO admins 
+			(admin_handle)
+		VALUES
+			($1)
+		;
+	`, os.Getenv("BASE_ADMIN_ACCOUNT"))
+	if err != nil {
+		log.Fatal("Error adding admin:", err)
+	}
+	log.Println("base admin account added.")
 }

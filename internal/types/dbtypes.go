@@ -14,4 +14,5 @@ type QueueUser struct {
 type AdminUser struct {
 	AdminID     uint64 `db:"admin_id" note:"serial count"`
 	AdminHandle string `db:"admin_handle" note:"Refers to the Telegram handle"`
+	Removable   bool   `db:"removable" note:"at least one admin should be un-removable to prevent loss of bot access."`
 }

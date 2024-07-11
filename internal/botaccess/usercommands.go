@@ -6,15 +6,15 @@ import (
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/josh1248/nusc-queue-bot/internal/commandtypes"
 	"github.com/josh1248/nusc-queue-bot/internal/dbaccess"
+	"github.com/josh1248/nusc-queue-bot/internal/types"
 )
 
 // Command and description is hard-coded within the HelpFunction for circular dependencies.
 // You will need to update the help function accordingly if you want to change this definition.
 // If this becomes too troublesome, consider using the reflect package to store the handler
 // function names under a string first before using reflect.ValueOf().Call()
-var AvailableCommands = []commandtypes.AcceptedCommands{
+var UserCommands = []types.AcceptedCommands{
 	{
 		Command:     "join",
 		Description: "Join the virtual queue for the photobooth.",
@@ -26,21 +26,6 @@ var AvailableCommands = []commandtypes.AcceptedCommands{
 		Handler:     LeaveCommand,
 	},
 	{
-		Command:     "seequeue",
-		Description: "(admins only - check this): see the contents of the queue now.",
-		Handler:     SeeQueueCommand,
-	},
-	{
-		Command:     "ping",
-		Description: "(admins only - check this): send a reminder to the first person in queue.",
-		Handler:     PingCommand,
-	},
-	{
-		Command:     "kick",
-		Description: "(admins only - check this): remove the person at some set position",
-		Handler:     KickCommand,
-	},
-	{
 		Command:     "howlong",
 		Description: "Returns the expected time to wait in the queue",
 		Handler:     HowLongCommand,
@@ -48,49 +33,33 @@ var AvailableCommands = []commandtypes.AcceptedCommands{
 	{
 		Command:     "help",
 		Description: "Explains the main functionalities of the bot.",
-		Handler:     HelpCommand,
+		Handler:     UserHelpCommand,
 	},
 	{
 		Command:     "start",
 		Description: "Explains the main functionalities of the bot.",
-		Handler:     HelpCommand,
+		Handler:     UserHelpCommand,
 	},
 }
 
 func NonTextHandler(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	return NonTextFeedback
+	return nonTextFeedback
 }
-
-const nonCommandFeedback string = "Please input a command which starts with '/', like /start"
 
 func NonCommandHandler(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	return nonCommandFeedback
 }
 
-const invalidCommandFeedback string = "Sorry, I don't recognize your command :("
-
 func InvalidCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	return invalidCommandFeedback
 }
 
-const helpFeepback string = `
-Welcome to the queue bot~
-
-/join - join the photobooth queue!
-
-/leave - leave the photobooth queue if you have previously joined.
-
-/howlong - check how many people are in front of you.
-
-For more options, check out the 'Menu' button at the bottom left of this chat!
-`
-
-func HelpCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	return helpFeepback
+func UserHelpCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
+	return userHelpFeedback
 }
 
 func JoinCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	err := dbaccess.JoinQueue(userMessage)
+	err := dbaccess.JoinQueue(userMessage.SentFrom().UserName, userMessage.SentFrom().ID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
@@ -100,7 +69,7 @@ func JoinCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback st
 		}
 		log.Println(err)
 	} else {
-		feedback = "Joined the queue..."
+		return joinQueueSuccess
 	}
 
 	return feedback
@@ -122,11 +91,23 @@ func LeaveCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback s
 }
 
 func SeeQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	feedback, err := dbaccess.CheckQueueContents()
+	queueUsers, err := dbaccess.CheckQueueContents()
 	if err != nil {
 		feedback = "Something went wrong when accessing the queue... blame @joshtwo."
 		log.Println(err)
 	}
+
+	userToStr := func(user types.QueueUser) string {
+		return fmt.Sprintf("@%s %s\n", user.UserHandle, user.Joined_at.Format("15:04:05"))
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Total queue length: %v \n\nName		Joined at\n ", len(queueUsers)))
+	for _, user := range queueUsers {
+		sb.WriteString(userToStr(user))
+	}
+
+	feedback = sb.String()
 	return feedback
 }
 
@@ -139,17 +120,18 @@ func HowLongCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback
 		return feedback
 	}
 
-	var info string
-	if queueLength == 1 {
-		info = fmt.Sprintf("%s %d %s", "is", queueLength, "group")
-	} else {
-		info = fmt.Sprintf("%s %d %s", "are", queueLength, "groups")
+	info := func(queueLength int) string {
+		if queueLength == 1 {
+			return fmt.Sprintf("%s %d %s", "is", queueLength, "group")
+		} else {
+			return fmt.Sprintf("%s %d %s", "are", queueLength, "groups")
+		}
 	}
 
 	if isInQueue {
-		feedback = fmt.Sprintf("There %s in front of you now.", info)
+		feedback = fmt.Sprintf("There %s in front of you.", info(queueLength-1))
 	} else {
-		feedback = fmt.Sprintf("There %s total in the queue now.", info)
+		feedback = fmt.Sprintf("There %s in the queue now. (Join the queue with /join.)", info(queueLength))
 	}
 	return feedback
 }

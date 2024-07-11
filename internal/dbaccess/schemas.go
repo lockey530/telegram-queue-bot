@@ -4,7 +4,8 @@ const (
 	adminSchema string = `
 		CREATE TABLE admins (
 			admin_id				SERIAL PRIMARY KEY,
-			admin_handle		 	TEXT 	UNIQUE NOT NULL
+			admin_handle		 	TEXT 	UNIQUE NOT NULL,
+			removable				BOOLEAN DEFAULT true
 		);
 	`
 
