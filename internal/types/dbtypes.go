@@ -1,6 +1,8 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
 type QueueUser struct {
 	QueueID    uint64    `db:"queue_id" note:"Postgres-generated identifier"`

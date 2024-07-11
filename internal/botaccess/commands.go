@@ -1,15 +1,13 @@
-package handlers
+package botaccess
 
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/josh1248/nusc-queue-bot/internal/commandtypes"
 	"github.com/josh1248/nusc-queue-bot/internal/dbaccess"
-	"github.com/josh1248/nusc-queue-bot/internal/userfeedback"
 )
 
 // Command and description is hard-coded within the HelpFunction for circular dependencies.
@@ -60,7 +58,7 @@ var AvailableCommands = []commandtypes.AcceptedCommands{
 }
 
 func NonTextHandler(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	return userfeedback.NonTextFeedback
+	return NonTextFeedback
 }
 
 const nonCommandFeedback string = "Please input a command which starts with '/', like /start"
@@ -158,17 +156,12 @@ func HowLongCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback
 
 func KickCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	if len(userMessage.Message.Text) < 6 {
-		feedback = "input the position to kick the person at."
-		return feedback
-	}
-	kickPosition, err := strconv.Atoi(userMessage.Message.Text[6:])
-	if err != nil {
-		feedback = "did not submit text."
-		log.Println(err)
+		feedback = "input the username to kick. Example: /kick @userABC"
 		return feedback
 	}
 
-	chatID, err := dbaccess.KickPerson(int64(kickPosition))
+	telegramHandle := userMessage.Message.Text[6:]
+	chatID, err := dbaccess.KickPerson(telegramHandle)
 	if err != nil {
 		feedback = "You failed to kick the first person: " + err.Error()
 		log.Printf("Error sending message %v\n", err)
@@ -178,12 +171,12 @@ func KickCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback st
 	msg := tgbotapi.NewMessage(chatID, "You have been kicked from the queue.")
 	_, err = bot.Send(msg)
 	if err != nil {
-		feedback = "You failed to kick the first person: " + err.Error()
+		feedback = "You failed to kick " + telegramHandle + " : " + err.Error()
 		log.Printf("Error sending message %v\n", err)
 		return feedback
 	}
 
-	feedback = "First person in queue kicked and notified"
+	feedback = "Successfully kicked " + telegramHandle
 	return feedback
 }
 

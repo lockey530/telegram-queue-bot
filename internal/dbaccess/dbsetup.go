@@ -14,12 +14,6 @@ var db *sqlx.DB
 // Must be called before any interaction with the DB to initialize the db connection.
 func EstablishDBConnection(toReset bool) {
 	log.Println("Connecting to database...")
-	/*
-		err := godotenv.Load(".env")
-		if err != nil {
-			log.Fatalln("Error loading .env file")
-		}*/
-
 	user := os.Getenv("POSTGRES_USER")
 	dbname := os.Getenv("POSTGRES_DB")
 	password := os.Getenv("POSTGRES_PASSWORD")
@@ -71,6 +65,15 @@ func EstablishDBConnection(toReset bool) {
 	}
 	initSchemaIfEmpty()
 }
+
+// https://stackoverflow.com/questions/20582500/how-to-check-if-a-table-exists-in-a-given-schema
+const checkTableExistenceQuery string = `
+	SELECT EXISTS (
+		SELECT FROM pg_tables
+		WHERE  	schemaname = 'public'
+		AND    	tablename  = $1
+		);
+`
 
 func initSchemaIfEmpty() {
 	var tableExists bool

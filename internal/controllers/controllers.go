@@ -4,7 +4,7 @@ import (
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/josh1248/nusc-queue-bot/internal/handlers"
+	"github.com/josh1248/nusc-queue-bot/internal/botaccess"
 )
 
 // receives a user command and sends a reply message.
@@ -20,13 +20,13 @@ func ReceiveCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	if userMessage.Message.Document != nil {
 		log.Printf("Invalid non-text message received from user @%s\n", username)
-		reply.Text = handlers.NonTextHandler(userMessage, bot)
+		reply.Text = botaccess.NonTextHandler(userMessage, bot)
 	} else if !userMessage.Message.IsCommand() {
 		log.Printf("Invalid output of %s received from user @%s\n", userMessage.Message.Text, username)
-		reply.Text = handlers.NonCommandHandler(userMessage, bot)
+		reply.Text = botaccess.NonCommandHandler(userMessage, bot)
 	}
 
-	for _, command := range handlers.AvailableCommands {
+	for _, command := range botaccess.AvailableCommands {
 		if userMessage.Message.Command() == command.Command {
 			reply.Text = command.Handler(userMessage, bot)
 			break
@@ -34,7 +34,7 @@ func ReceiveCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 
 	if reply.Text == "" {
-		reply.Text = handlers.InvalidCommand(userMessage, bot)
+		reply.Text = botaccess.InvalidCommand(userMessage, bot)
 	}
 
 	_, err := bot.Send(reply)

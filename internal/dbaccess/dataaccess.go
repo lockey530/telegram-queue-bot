@@ -80,28 +80,27 @@ func LeaveQueue(userHandle string) error {
 
 func NotifyQueue(position int64) (chatID int64, err error) {
 	user := types.QueueUser{}
-	if err := db.Get(&user, "SELECT (chat_id) FROM queue ORDER BY joined_at OFFSET $1 LIMIT 1;", position); err != nil {
+	if err := db.Get(&user, "SELECT (chat_id) FROM queue ORDER BY joined_at OFFSET $1 LIMIT 1;", position-1); err != nil {
 		return 0, fmt.Errorf("failed to get first user in queue: %v", err)
 	}
 
 	return user.ChatID, nil
 }
 
-func KickPerson(position int64) (chatID int64, err error) {
+// Kick a person with a Telegram handle.
+// Returns a chatID for further communications.
+func KickPerson(telegramHandle string) (chatID int64, err error) {
 	// this will need to be adjusted after implementing the waiting feature.
-	_, err = db.Exec(`
+	var chat []int64
+	err = db.Select(&chat, `
 		DELETE FROM queue 
-		WHERE chat_id = (
-			SELECT chat_id
-			FROM queue
-			ORDER BY joined_at
-			LIMIT 1
-		);
-	`)
-
+		WHERE user_handle = $1
+		RETURNING chat_id;
+	`, telegramHandle[1:])
 	if err != nil {
-		return 0, fmt.Errorf("failed to kick %vth position from queue. %v", position, err)
+		return 0, fmt.Errorf("failed to kick @%v. %v", telegramHandle, err)
 	}
+	chatID = chat[0]
 
 	return chatID, nil
 }

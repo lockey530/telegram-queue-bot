@@ -10,14 +10,13 @@ import (
 	"github.com/josh1248/nusc-queue-bot/internal/botaccess"
 	"github.com/josh1248/nusc-queue-bot/internal/controllers"
 	"github.com/josh1248/nusc-queue-bot/internal/dbaccess"
-	"github.com/josh1248/nusc-queue-bot/internal/handlers"
 )
 
 func main() {
 	bot := botaccess.InitializeBotAPIConnection()
 
-	menuOptions := make([]tgbotapi.BotCommand, len(handlers.AvailableCommands))
-	for i, command := range handlers.AvailableCommands {
+	menuOptions := make([]tgbotapi.BotCommand, len(botaccess.AvailableCommands))
+	for i, command := range botaccess.AvailableCommands {
 		menuOptions[i] = tgbotapi.BotCommand{Command: command.Command, Description: command.Description}
 	}
 	menu := tgbotapi.NewSetMyCommands(menuOptions...)
@@ -26,7 +25,6 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	// temporary - split and shift this.
 	godotenv.Load()
 
 	log.Println("Checking if db data is to be cleared...")
