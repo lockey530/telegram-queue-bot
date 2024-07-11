@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	types "github.com/josh1248/nusc-queue-bot/internal/types"
 )
 
 func JoinQueue(user tgbotapi.Update) error {
@@ -23,7 +24,7 @@ func JoinQueue(user tgbotapi.Update) error {
 }
 
 func CheckQueueContents() (string, error) {
-	queue := []QueueUser{}
+	queue := []types.QueueUser{}
 	if err := db.Select(&queue, "SELECT * FROM queue;"); err != nil {
 		return "", fmt.Errorf("failed to get queue state. %v", err)
 	}
@@ -78,7 +79,7 @@ func LeaveQueue(userHandle string) error {
 }
 
 func NotifyQueue(position int64) (chatID int64, err error) {
-	user := QueueUser{}
+	user := types.QueueUser{}
 	if err := db.Get(&user, "SELECT (chat_id) FROM queue ORDER BY joined_at OFFSET $1 LIMIT 1;", position); err != nil {
 		return 0, fmt.Errorf("failed to get first user in queue: %v", err)
 	}

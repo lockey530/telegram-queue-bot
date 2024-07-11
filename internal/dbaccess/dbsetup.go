@@ -26,25 +26,12 @@ func EstablishDBConnection(toReset bool) {
 	port := os.Getenv("PGPORT")
 	host := os.Getenv("PGHOST")
 
-	log.Println(user)
-	log.Println(dbname)
-	log.Println(password)
-	log.Println(port)
-
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		user,
 		password,
 		host,
 		port,
 		dbname)
-
-	if user == "" {
-		log.Fatalln("User not provided in .env file.")
-	} else if dbname == "" {
-		log.Fatalln("Database name not provided in .env file.")
-	} else if port == "" {
-		log.Fatalln("Port not provided in .env file.")
-	}
 
 	// prevent db from being scoped locally - for package use.
 	var err error
@@ -73,7 +60,14 @@ func EstablishDBConnection(toReset bool) {
 	log.Printf("User Name: %s\n", userName)
 
 	if toReset {
-		dropDB()
+		_, err := db.Exec(`
+			DROP TABLE IF EXISTS 
+				queue, admins;
+		`)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("DB dropped.")
 	}
 	initSchemaIfEmpty()
 }
