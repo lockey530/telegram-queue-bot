@@ -61,8 +61,8 @@ const (
 	// admins
 	seeQueueStateSuccess string = "Something went wrong when accessing the queue state :("
 
-	removeFirstInQueueSuccess string = ""
-	removeFirstInQueueFailure string = ""
+	removeFirstInQueueSuccess string = "successfully removed first peson in queue. Removed: "
+	removeFirstInQueueFailure string = "failed to remove first person in queue. Error: "
 
 	kickCommandInvalidArguments string = "input the handle of the person you are kicking, e.g. /kick @xyz"
 	kickCommandInvalidUser      string = "user inputted was not in queue."

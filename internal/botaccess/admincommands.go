@@ -77,12 +77,12 @@ func CheckAdminListCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (f
 }
 
 func RemoveFirstInQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	_, err := dbaccess.RemoveFirstInQueue(userMessage.SentFrom().UserName)
+	removed, err := dbaccess.RemoveFirstInQueue()
 	if err != nil {
 		log.Println(err)
-		return removeFirstInQueueFailure
+		return removeFirstInQueueFailure + err.Error()
 	} else {
-		return removeFirstInQueueSuccess
+		return removeFirstInQueueSuccess + "@" + removed
 	}
 }
 

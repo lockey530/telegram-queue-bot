@@ -24,22 +24,31 @@ func CheckIfAdmin(handle string) (bool, error) {
 	return count > 0, nil
 }
 
-// Kick a person with a Telegram handle.
-// Returns a chatID for further communications.
-func RemoveFirstInQueue(toRemove string) (chatID int64, err error) {
-	// this will need to be adjusted after implementing the waiting feature.
-	var chat []int64
-	err = db.Select(&chat, `
+func RemoveFirstInQueue() (userHandle string, err error) {
+	var handle []string
+	err = db.Select(&handle, `
 		DELETE FROM queue 
-		WHERE user_handle = $1
-		RETURNING chat_id;
-	`, toRemove)
+		WHERE user_handle = (
+			SELECT 
+				user_handle
+			FROM 
+				admins
+			ORDER BY 
+				joined_at
+			LIMIT 1
+		)
+		RETURNING user_handle;
+	`)
 	if err != nil {
-		return 0, fmt.Errorf("failed to kick @%v. %v", toRemove, err)
+		return "", fmt.Errorf("failed to remove people from queue. Error: %v", err)
+	} else if len(handle) == 0 {
+		return "", fmt.Errorf("no people present in the queue")
 	}
-	chatID = chat[0]
 
-	return chatID, nil
+	handleRemoved := handle[0]
+	log.Printf("successfully removed first person (%s) in queue.\n", handleRemoved)
+
+	return handleRemoved, nil
 }
 
 // Kick a person with a Telegram handle.
