@@ -31,9 +31,9 @@ var AdminCommands = []types.AcceptedCommands{
 		Handler:     RemoveFirstInQueueCommand,
 	},
 	{
-		Command:     "seeadmins",
+		Command:     "adminlist",
 		Description: "see who has the ability to control the bot.",
-		Handler:     KickCommand,
+		Handler:     CheckAdminListCommand,
 	},
 	{
 		Command:     "addadmin",
@@ -72,16 +72,51 @@ func CheckAdminListCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (f
 		for _, admin := range admins {
 			sb.WriteString("@" + admin + "\n")
 		}
+		return sb.String()
 	}
-	return feedback
 }
 
 func RemoveFirstInQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	return adminHelpFeedback
+	_, err := dbaccess.RemoveFirstInQueue(userMessage.SentFrom().UserName)
+	if err != nil {
+		log.Println(err)
+		return removeFirstInQueueFailure
+	} else {
+		return removeFirstInQueueSuccess
+	}
 }
+
 func AddAdminCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	return adminHelpFeedback
+	if len(userMessage.Message.Text) < 12 {
+		feedback = "input the username to add as an admin. Example: /addadmin @userABC"
+		return feedback
+	}
+	telegramHandle := userMessage.Message.Text[11:]
+
+	err := dbaccess.AddAdmin(telegramHandle, userMessage.SentFrom().UserName)
+	if err != nil {
+		log.Println(err)
+		return addAdminFailure
+	} else {
+		return addAdminSuccess
+	}
 }
+
 func RemoveAdminCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	return adminHelpFeedback
+	if len(userMessage.Message.Text) < 15 {
+		feedback = "input the username to remove as an admin. Example: /removeadmin @userABC"
+		return feedback
+	}
+	telegramHandle := userMessage.Message.Text[14:]
+
+	issue, err := dbaccess.RemoveAdmin(telegramHandle, userMessage.SentFrom().UserName)
+	if err != nil {
+		log.Println(err)
+		if issue != "" {
+			return issue
+		}
+		return removeAdminFailure
+	} else {
+		return removeAdminSuccess
+	}
 }

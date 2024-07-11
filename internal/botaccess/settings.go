@@ -26,7 +26,7 @@ const (
 	
 	/kick @handle - remove a person from the queue, e.g. /kick @abc
 
-	/seeadmins - see who has the ability to control the bot.
+	/adminlist - see who has the ability to control the bot.
 
 	/addadmin @handle - allow another person to control the bot, e.g. /addadmin @abc
 
@@ -43,6 +43,7 @@ const (
 	/howlong - check how many people are in front of you.
 	`
 
+	// users
 	nonTextFeedback string = "I don't know what this is :( please send me text commands!"
 
 	nonCommandFeedback string = "Please input a command which starts with '/', like /start"
@@ -57,12 +58,23 @@ const (
 	leaveQueueSuccess   string = "Left the queue..."
 	leaveQueueFailure   string = "You were unable to leave the queue due to an unexpected error :("
 
+	// admins
 	seeQueueStateSuccess string = "Something went wrong when accessing the queue state :("
+
+	removeFirstInQueueSuccess string = ""
+	removeFirstInQueueFailure string = ""
 
 	kickCommandInvalidArguments string = "input the handle of the person you are kicking, e.g. /kick @xyz"
 	kickCommandInvalidUser      string = "user inputted was not in queue."
 	kickCommandUserFeedback     string = "You have been removed from the queue."
 	kickCommandAdminFeedback    string = "First person in queue kicked and notified"
+
+	// append reason behind this string.
+	addAdminFailure string = "failed to add admin :("
+	addAdminSuccess string = "added successfully!"
+	// append reason behind this string.
+	removeAdminFailure string = "failed to remove admin :("
+	removeAdminSuccess string = "removed successfully!"
 
 	pingCommandUserFeedback string = "Hey, you are the first person in queue! get moving :D"
 

@@ -105,9 +105,9 @@ func initSchemaIfEmpty() {
 
 	_, err = db.Exec(`
 		INSERT INTO admins 
-			(admin_handle)
+			(admin_handle, removable)
 		VALUES
-			($1)
+			($1, false)
 		;
 	`, os.Getenv("BASE_ADMIN_ACCOUNT"))
 	if err != nil {

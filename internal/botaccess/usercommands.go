@@ -137,12 +137,12 @@ func HowLongCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback
 }
 
 func KickCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
-	if len(userMessage.Message.Text) < 6 {
+	if len(userMessage.Message.Text) < 7 {
 		feedback = "input the username to kick. Example: /kick @userABC"
 		return feedback
 	}
 
-	telegramHandle := userMessage.Message.Text[6:]
+	telegramHandle := userMessage.Message.Text[7:]
 	chatID, err := dbaccess.KickPerson(telegramHandle)
 	if err != nil {
 		feedback = "You failed to kick the first person: " + err.Error()
