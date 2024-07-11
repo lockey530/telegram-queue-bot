@@ -26,6 +26,10 @@ const (
 	
 	/kick @handle - remove a person from the queue, e.g. /kick @abc
 
+	/stopqueue - stop allowing people to join the queue.
+
+	/startqueue - allow people to join the queue.
+
 	/adminlist - see who has the ability to control the bot.
 
 	/addadmin @handle - allow another person to control the bot, e.g. /addadmin @abc

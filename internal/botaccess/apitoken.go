@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// I am a dirty global variable user :( can switch to middleware or dependency injection if polishing is desired.
 var botAPI *tgbotapi.BotAPI
 
 // implicit .env arguments: BOT_TOKEN.
