@@ -80,7 +80,7 @@ func SeeQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedbac
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Total queue length: %v \n\nName		Joined at\n ", len(queueUsers)))
+	sb.WriteString(fmt.Sprintf("People in queue: %v \nQueue open: %v \n\nName		Joined at\n ", len(queueUsers), queuestatus.IsQueueOpen()))
 	for _, user := range queueUsers {
 		sb.WriteString(userToStr(user))
 	}
@@ -167,7 +167,16 @@ func KickCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback st
 	}
 
 	feedback = "Successfully kicked " + telegramHandle
+
+	_, nextPersonChatID, err := dbaccess.GetPositionInQueue(1)
+	if err != nil {
+		return feedback
+	}
+
+	msg = tgbotapi.NewMessage(nextPersonChatID, "You are the next person in queue - get moving!")
+	bot.Send(msg)
 	return feedback
+
 }
 
 func AdminHelpCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
@@ -192,11 +201,18 @@ func CheckAdminListCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (f
 func RemoveFirstInQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	removed, err := dbaccess.RemoveFirstInQueue()
 	if err != nil {
-		log.Println(err)
-		return removeFirstInQueueFailure + err.Error()
-	} else {
-		return removeFirstInQueueSuccess + "@" + removed
+		log.Printf("Failed to remove first person in queue %v\n", err)
+		return fmt.Sprintf("%v\n", err)
 	}
+
+	msg := tgbotapi.NewMessage(removed, "Beep boop, thank you for coming =)")
+	_, err = bot.Send(msg)
+	if err != nil {
+		log.Printf("Error sending message %v\n", err)
+		return fmt.Sprintf("Error sending message %v\n", err)
+	}
+
+	return "Successfully removed first user in queue."
 }
 
 func AddAdminCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {

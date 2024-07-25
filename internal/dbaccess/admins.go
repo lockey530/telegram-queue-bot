@@ -3,6 +3,8 @@ package dbaccess
 import (
 	"fmt"
 	"log"
+
+	"github.com/josh1248/nusc-queue-bot/internal/types"
 )
 
 func CheckIfAdmin(handle string) (bool, error) {
@@ -24,31 +26,56 @@ func CheckIfAdmin(handle string) (bool, error) {
 	return count > 0, nil
 }
 
-func RemoveFirstInQueue() (userHandle string, err error) {
-	var handle []string
-	err = db.Select(&handle, `
+func RemoveFirstInQueue() (userHandle int64, err error) {
+	var chat []struct {
+		ChatID     int64  `db:"chat_id"`
+		UserHandle string `db:"user_handle"`
+	}
+	err = db.Select(&chat, `
 		DELETE FROM queue 
 		WHERE user_handle = (
 			SELECT 
 				user_handle
 			FROM 
-				admins
+				queue
 			ORDER BY 
 				joined_at
 			LIMIT 1
 		)
-		RETURNING user_handle;
+		RETURNING chat_id, user_handle;
 	`)
 	if err != nil {
-		return "", fmt.Errorf("failed to remove people from queue. Error: %v", err)
-	} else if len(handle) == 0 {
-		return "", fmt.Errorf("no people present in the queue")
+		return -1, fmt.Errorf("failed to remove people from queue. Error: %v", err)
+	} else if len(chat) == 0 {
+		return -1, fmt.Errorf("no people present in the queue")
 	}
 
-	handleRemoved := handle[0]
+	handleRemoved := chat[0].UserHandle
 	log.Printf("successfully removed first person (%s) in queue.\n", handleRemoved)
 
-	return handleRemoved, nil
+	return chat[0].ChatID, nil
+}
+
+// position should be 1-indexed.
+func GetPositionInQueue(position int) (userHandle string, chatID int64, err error) {
+	var chat []types.QueueUser
+
+	err = db.Select(&chat, `
+		SELECT 
+			*
+		FROM 
+			queue 
+		ORDER BY 
+			joined_at;
+	`)
+
+	if err != nil {
+		return "", -1, err
+	} else if len(chat) < position {
+		return "", -1, fmt.Errorf("your queue only has %v people\n", len(chat))
+	}
+
+	return chat[position-1].UserHandle, chat[position-1].ChatID, nil
 }
 
 // Kick a person with a Telegram handle.

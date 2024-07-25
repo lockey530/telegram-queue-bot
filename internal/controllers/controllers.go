@@ -63,8 +63,3 @@ func ReceiveCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 	log.Printf("Processed command %s from @%s.\n", userMessage.Message.Text, username)
 }
-
-// sends a message to some existing user within the queue.
-func SendToQueueUser(userID int64, msg string) {
-
-}
