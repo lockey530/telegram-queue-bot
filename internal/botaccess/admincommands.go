@@ -132,7 +132,7 @@ func PingCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback st
 		return feedback
 	}
 
-	msg := tgbotapi.NewMessage(chatID, "Hey, you are the first person in queue! get moving :D")
+	msg := tgbotapi.NewMessage(chatID, "It's your turn for the photobooth!")
 	_, err = bot.Send(msg)
 	if err != nil {
 		feedback = "You failed to kick the first person: " + err.Error()
@@ -172,9 +172,16 @@ func KickCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback st
 	if err != nil {
 		return feedback
 	}
-
-	msg = tgbotapi.NewMessage(nextPersonChatID, "You are the next person in queue - get moving!")
+	msg = tgbotapi.NewMessage(nextPersonChatID, "It's your turn for the photobooth!")
 	bot.Send(msg)
+
+	_, nextPersonChatID, err = dbaccess.GetPositionInQueue(2)
+	if err != nil {
+		return feedback
+	}
+	msg = tgbotapi.NewMessage(nextPersonChatID, "You are the next person in queue - prepare to head down to the photobooth!")
+	bot.Send(msg)
+
 	return feedback
 
 }
