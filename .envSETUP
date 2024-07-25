@@ -1,5 +1,12 @@
 BOT_TOKEN=(your bot API here)
-CLEAR_DATA=(boolean: wipes data regarding the queue bot if needed - use during testing to clear junk data, and turn off otherwise.)
-POSTGRES_USER=(your Postgres user with superuser privilege.)
-POSTGRES_DB=(your Postgres database to connect to - you can use the Postgres app or other means to create or check which database you want to connect to.)
-POSTGRES_PORT=(your server port for Postgres, typically 5432)
+RESET_DB=(boolean: wipes data regarding the queue bot if needed - 'true' during testing to clear junk data, 'false' otherwise.)
+BASE_ADMIN_ACCOUNT=(place the person that is to be the first admin of the bot. If your handle is @abc, type abc without the @.)
+
+# Postgres access details
+## named to allow remote deployment override
+# see https://github.com/docker-library/docs/blob/master/postgres/README.md#environment-variables
+POSTGRES_USER=postgres
+POSTGRES_DB=postgres
+POSTGRES_PASSWORD=postgres
+PGHOST=localhost
+PGPORT=5432

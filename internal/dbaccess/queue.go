@@ -3,14 +3,13 @@ package dbaccess
 import (
 	"fmt"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	types "github.com/josh1248/nusc-queue-bot/internal/types"
 )
 
-func JoinQueue(user tgbotapi.Update) error {
+func JoinQueue(username string, chatID int64) error {
 	tx := db.MustBegin()
 	_, err := tx.Exec("INSERT INTO queue (user_handle, chat_id) VALUES ($1, $2);",
-		user.SentFrom().UserName, user.SentFrom().ID)
-
+		username, chatID)
 	if err != nil {
 		return fmt.Errorf("insertion query failed to execute. %v", err)
 	}
@@ -18,17 +17,16 @@ func JoinQueue(user tgbotapi.Update) error {
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("transaction for insertion failed to commit. %v", err)
 	}
-
 	return nil
 }
 
-func CheckQueueContents() (string, error) {
-	queue := []QueueUser{}
+func CheckQueueContents() ([]types.QueueUser, error) {
+	queue := []types.QueueUser{}
 	if err := db.Select(&queue, "SELECT * FROM queue;"); err != nil {
-		return "", fmt.Errorf("failed to get queue state. %v", err)
+		return nil, fmt.Errorf("failed to get queue state. %v", err)
 	}
 
-	return fmt.Sprintf("%v", queue), nil
+	return queue, nil
 }
 
 func CheckIfInQueue(userHandle string) (bool, error) {
@@ -78,29 +76,10 @@ func LeaveQueue(userHandle string) error {
 }
 
 func NotifyQueue(position int64) (chatID int64, err error) {
-	user := QueueUser{}
-	if err := db.Get(&user, "SELECT (chat_id) FROM queue ORDER BY joined_at OFFSET $1 LIMIT 1;", position); err != nil {
+	user := types.QueueUser{}
+	if err := db.Get(&user, "SELECT (chat_id) FROM queue ORDER BY joined_at OFFSET $1 LIMIT 1;", position-1); err != nil {
 		return 0, fmt.Errorf("failed to get first user in queue: %v", err)
 	}
 
 	return user.ChatID, nil
-}
-
-func KickPerson(position int64) (chatID int64, err error) {
-	// this will need to be adjusted after implementing the waiting feature.
-	_, err = db.Exec(`
-		DELETE FROM queue 
-		WHERE chat_id = (
-			SELECT chat_id
-			FROM queue
-			ORDER BY joined_at
-			LIMIT 1
-		);
-	`)
-
-	if err != nil {
-		return 0, fmt.Errorf("failed to kick %vth position from queue. %v", position, err)
-	}
-
-	return chatID, nil
 }

@@ -10,26 +10,13 @@ import (
 	"github.com/josh1248/nusc-queue-bot/internal/botaccess"
 	"github.com/josh1248/nusc-queue-bot/internal/controllers"
 	"github.com/josh1248/nusc-queue-bot/internal/dbaccess"
-	"github.com/josh1248/nusc-queue-bot/internal/handlers"
 )
 
 func main() {
-	bot := botaccess.InitializeBotAPIConnection()
-
-	menuOptions := make([]tgbotapi.BotCommand, len(handlers.AvailableCommands))
-	for i, command := range handlers.AvailableCommands {
-		menuOptions[i] = tgbotapi.BotCommand{Command: command.Command, Description: command.Description}
-	}
-	menu := tgbotapi.NewSetMyCommands(menuOptions...)
-	bot.Send(menu)
-
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
-	// temporary - split and shift this.
 	godotenv.Load()
 
-	log.Println("Checking if db data is to be cleared...")
+	bot := botaccess.InitializeBotAPIConnection()
+
 	tmp := os.Getenv("RESET_DB")
 	if tmp == "" {
 		log.Fatalln("Could not read RESET_DB info from .env")
@@ -42,6 +29,16 @@ func main() {
 
 	log.Printf("Check done, CLEAR_DATA=%t", toClearData)
 	dbaccess.EstablishDBConnection(toClearData)
+
+	menuOptions := make([]tgbotapi.BotCommand, len(botaccess.UserCommands))
+	for i, command := range botaccess.UserCommands {
+		menuOptions[i] = tgbotapi.BotCommand{Command: command.Command, Description: command.Description}
+	}
+	menu := tgbotapi.NewSetMyCommands(menuOptions...)
+	bot.Send(menu)
+
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
 
 	updates := bot.GetUpdatesChan(u)
 	log.Println("Listening for incoming messages...")

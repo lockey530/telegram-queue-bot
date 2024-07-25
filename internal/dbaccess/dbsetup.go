@@ -14,22 +14,11 @@ var db *sqlx.DB
 // Must be called before any interaction with the DB to initialize the db connection.
 func EstablishDBConnection(toReset bool) {
 	log.Println("Connecting to database...")
-	/*
-		err := godotenv.Load(".env")
-		if err != nil {
-			log.Fatalln("Error loading .env file")
-		}*/
-
-	user := os.Getenv("PGUSER")
-	dbname := os.Getenv("PGDATABASE")
-	password := os.Getenv("PGPASSWORD")
+	user := os.Getenv("POSTGRES_USER")
+	dbname := os.Getenv("POSTGRES_DB")
+	password := os.Getenv("POSTGRES_PASSWORD")
 	port := os.Getenv("PGPORT")
 	host := os.Getenv("PGHOST")
-
-	log.Println(user)
-	log.Println(dbname)
-	log.Println(password)
-	log.Println(port)
 
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		user,
@@ -38,21 +27,11 @@ func EstablishDBConnection(toReset bool) {
 		port,
 		dbname)
 
-	if user == "" {
-		log.Fatalln("User not provided in .env file.")
-	} else if dbname == "" {
-		log.Fatalln("Database name not provided in .env file.")
-	} else if port == "" {
-		log.Fatalln("Port not provided in .env file.")
-	}
-
 	// prevent db from being scoped locally - for package use.
 	var err error
 	db, err = sqlx.Connect(
 		"postgres",
 		url)
-	// fmt.Sprintf("postgres://%s:%s@%s:/%s?sslmode=disable",
-	// 	"joshthoo", "2100Isnotaleapyear!", "localhost", port))
 
 	if err != nil {
 		log.Fatalln(err)
@@ -75,10 +54,26 @@ func EstablishDBConnection(toReset bool) {
 	log.Printf("User Name: %s\n", userName)
 
 	if toReset {
-		dropDB()
+		_, err := db.Exec(`
+			DROP TABLE IF EXISTS 
+				queue, admins;
+		`)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("DB dropped.")
 	}
 	initSchemaIfEmpty()
 }
+
+// https://stackoverflow.com/questions/20582500/how-to-check-if-a-table-exists-in-a-given-schema
+const checkTableExistenceQuery string = `
+	SELECT EXISTS (
+		SELECT FROM pg_tables
+		WHERE  	schemaname = 'public'
+		AND    	tablename  = $1
+		);
+`
 
 func initSchemaIfEmpty() {
 	var tableExists bool
@@ -107,4 +102,16 @@ func initSchemaIfEmpty() {
 	} else {
 		log.Println("admin schema already initiated.")
 	}
+
+	_, err = db.Exec(`
+		INSERT INTO admins 
+			(admin_handle, removable)
+		VALUES
+			($1, false)
+		;
+	`, os.Getenv("BASE_ADMIN_ACCOUNT"))
+	if err != nil {
+		log.Fatal("Error adding admin:", err)
+	}
+	log.Println("base admin account added.")
 }
