@@ -103,7 +103,7 @@ func StartQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedb
 func HowLongCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	isInQueue, queueLength, err := dbaccess.CheckQueueLength(userMessage.SentFrom().UserName)
 	if err != nil {
-		feedback = "Something went wrong when accessing the queue... blame @joshtwo."
+		feedback = "Something went wrong when accessing the queue..."
 		log.Println(err)
 		return feedback
 	}

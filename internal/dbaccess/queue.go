@@ -49,11 +49,25 @@ func CheckQueueLength(userHandle string) (bool, int, error) {
 	var queueLength int
 	// https://wiki.postgresql.org/wiki/Count_estimate for the method which requires ANALYZE
 	// but can be faster.
-	if isInQueue {
+	if !isInQueue {
 		// update this
 		err = db.Get(&queueLength, "SELECT count(*) FROM queue;")
 	} else {
-		err = db.Get(&queueLength, "SELECT count(*) FROM queue;")
+		err = db.Get(&queueLength, `
+			SELECT 
+				count(*)
+			FROM 
+				queue
+			WHERE
+				joined_at <= (
+					SELECT
+						joined_at
+					FROM
+						queue
+					WHERE
+						user_handle = $1
+				);
+			`, userHandle)
 	}
 
 	return isInQueue, queueLength, err

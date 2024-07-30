@@ -64,6 +64,11 @@ func EstablishDBConnection(toReset bool) {
 		log.Println("DB dropped.")
 	}
 	initSchemaIfEmpty()
+
+	_, err = db.Exec("SET TIME ZONE 'UTC-8'")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // https://stackoverflow.com/questions/20582500/how-to-check-if-a-table-exists-in-a-given-schema
