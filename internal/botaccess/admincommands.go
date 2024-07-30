@@ -32,6 +32,11 @@ var AdminCommands = []types.AcceptedCommands{
 		Handler:     RemoveFirstInQueueCommand,
 	},
 	{
+		Command:     "kick",
+		Description: "remove the specified person from the queue.",
+		Handler:     KickCommand,
+	},
+	{
 		Command:     "stopqueue",
 		Description: "Stop admitting perople into the queue.",
 		Handler:     StopQueueCommand,
@@ -57,6 +62,11 @@ var AdminCommands = []types.AcceptedCommands{
 		Handler:     RemoveAdminCommand,
 	},
 	{
+		Command:     "addDummy12345",
+		Description: "FOR TESTING ONLY",
+		Handler:     AddDummyCommand,
+	},
+	{
 		Command:     "help",
 		Description: "Explains the main functionalities of the bot.",
 		Handler:     AdminHelpCommand,
@@ -66,6 +76,11 @@ var AdminCommands = []types.AcceptedCommands{
 		Description: "Explains the main functionalities of the bot.",
 		Handler:     AdminHelpCommand,
 	},
+}
+
+func AddDummyCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
+	dbaccess.AddDummy()
+	return "dummy user added"
 }
 
 func SeeQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
@@ -127,7 +142,7 @@ func HowLongCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback
 func PingCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	chatID, err := dbaccess.NotifyQueue(1)
 	if err != nil {
-		feedback = "You failed to kick the first person: " + err.Error()
+		feedback = "You failed to notify the first person: " + err.Error()
 		log.Printf("Error sending message, %v\n", err)
 		return feedback
 	}
@@ -153,7 +168,7 @@ func KickCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback st
 	telegramHandle := userMessage.Message.Text[7:]
 	chatID, err := dbaccess.KickPerson(telegramHandle)
 	if err != nil {
-		feedback = "You failed to kick the first person: " + err.Error()
+		feedback = "You failed to kick the specified user: " + err.Error()
 		log.Printf("Error sending message %v\n", err)
 		return feedback
 	}
@@ -219,7 +234,25 @@ func RemoveFirstInQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI
 		return fmt.Sprintf("Error sending message %v\n", err)
 	}
 
-	return "Successfully removed first user in queue."
+	_, nextPersonChatID, _ := dbaccess.GetPositionInQueue(1)
+	if nextPersonChatID != -1 {
+		msg = tgbotapi.NewMessage(nextPersonChatID, "It's your turn for the photobooth!")
+		bot.Send(msg)
+	}
+
+	_, nextPersonChatID, _ = dbaccess.GetPositionInQueue(2)
+	if nextPersonChatID != -1 {
+		msg = tgbotapi.NewMessage(nextPersonChatID, "You are the next person in queue - please head down to the photobooth!")
+		bot.Send(msg)
+	}
+
+	_, nextPersonChatID, _ = dbaccess.GetPositionInQueue(3)
+	if nextPersonChatID != -1 {
+		msg = tgbotapi.NewMessage(nextPersonChatID, "You are 2nd in the queue - please head down to the photobooth!")
+		bot.Send(msg)
+	}
+
+	return feedback
 }
 
 func AddAdminCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {

@@ -119,4 +119,5 @@ func initSchemaIfEmpty() {
 		log.Fatal("Error adding admin:", err)
 	}
 	log.Println("base admin account added.")
+
 }

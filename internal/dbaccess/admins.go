@@ -87,9 +87,13 @@ func KickPerson(toKick string) (chatID int64, err error) {
 		DELETE FROM queue 
 		WHERE user_handle = $1
 		RETURNING chat_id;
-	`, toKick[1:])
+	`, toKick)
 	if err != nil {
 		return 0, fmt.Errorf("failed to kick @%v. %v", toKick, err)
+	}
+
+	if len(chat) != 1 {
+		return -1, fmt.Errorf("@%s is not in the queue", toKick)
 	}
 	chatID = chat[0]
 

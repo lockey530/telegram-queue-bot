@@ -6,6 +6,10 @@ import (
 	types "github.com/josh1248/nusc-queue-bot/internal/types"
 )
 
+func AddDummy() {
+	JoinQueue("test_user", 12345)
+}
+
 func JoinQueue(username string, chatID int64) error {
 	tx := db.MustBegin()
 	_, err := tx.Exec("INSERT INTO queue (user_handle, chat_id) VALUES ($1, $2);",
