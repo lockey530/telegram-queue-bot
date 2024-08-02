@@ -26,7 +26,10 @@ func JoinQueue(username string, chatID int64) error {
 
 func CheckQueueContents() ([]types.QueueUser, error) {
 	queue := []types.QueueUser{}
-	if err := db.Select(&queue, "SELECT * FROM queue;"); err != nil {
+	if err := db.Select(&queue, `
+	SELECT 
+		queue_id, user_handle, chat_id, (joined_at AT TIME ZONE 'Asia/Singapore')
+	FROM queue;`); err != nil {
 		return nil, fmt.Errorf("failed to get queue state. %v", err)
 	}
 

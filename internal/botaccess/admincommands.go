@@ -252,6 +252,7 @@ func RemoveFirstInQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI
 		bot.Send(msg)
 	}
 
+	feedback = "First person in queue removed."
 	return feedback
 }
 

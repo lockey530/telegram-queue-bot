@@ -48,12 +48,13 @@ func ReceiveCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		for _, command := range botaccess.UserCommands {
 			if userMessage.Message.Command() == command.Command {
 				reply.Text = command.Handler(userMessage, bot)
+				commandFulfilled = true
 				break
 			}
 		}
 	}
 
-	if reply.Text == "" {
+	if !commandFulfilled {
 		reply.Text = botaccess.InvalidCommand(userMessage, bot)
 	}
 
