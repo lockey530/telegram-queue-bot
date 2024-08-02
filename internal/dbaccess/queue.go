@@ -28,7 +28,7 @@ func CheckQueueContents() ([]types.QueueUser, error) {
 	queue := []types.QueueUser{}
 	if err := db.Select(&queue, `
 	SELECT 
-		queue_id, user_handle, chat_id, (joined_at AT TIME ZONE 'UTC' AT TIME ZONE 'UTC+8')
+		queue_id, user_handle, chat_id, (joined_at AT TIME ZONE 'UTC' AT TIME ZONE 'UTC+0')
 	FROM queue;`); err != nil {
 		return nil, fmt.Errorf("failed to get queue state. %v", err)
 	}
