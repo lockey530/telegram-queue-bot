@@ -2,7 +2,7 @@ package botaccess
 
 const (
 	userHelpFeedback string = `
-	Welcome to the NUSC queue bot!
+	Welcome to the Battambang queue bot!
 
 	/join - join the photobooth queue.
 
