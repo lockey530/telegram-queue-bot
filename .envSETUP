@@ -1,6 +1,6 @@
 BOT_TOKEN=7347219973:AAGKhFJgu60Uo7UbWZhXujpPGvVzBPGekDA
 RESET_DB=false
-BASE_ADMIN_ACCOUNT=(place the person that is to be the first admin of the bot. If your handle is @abc, type abc without the @.)
+BASE_ADMIN_ACCOUNT=JimmyHengg
 
 # Postgres access details
 ## named to allow remote deployment override
