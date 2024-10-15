@@ -60,15 +60,15 @@ func UserHelpCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedbac
 
 func JoinCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback string) {
 	if !queuestatus.IsQueueOpen() {
-		return "sorry, queue closed!"
+		return joinQueueClosed
 	}
 	err := dbaccess.JoinQueue(userMessage.SentFrom().UserName, userMessage.SentFrom().ID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-			feedback = "You have already joined this queue!"
+			feedback = joinQueueAlreadyJoined
 		} else {
-			feedback = "You were unable to join the queue due to an unexpected error :("
+			feedback = joinQueueFailure
 		}
 		log.Println(err)
 	} else {
@@ -82,13 +82,13 @@ func LeaveCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI) (feedback s
 	err := dbaccess.LeaveQueue(userMessage.SentFrom().UserName)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not in queue") {
-			feedback = "It seems you have not joined this queue yet!"
+			feedback = leaveQueueNotJoined
 		} else {
-			feedback = "You were unable to leave the queue due to an unexpected error :("
+			feedback = leaveQueueFailure
 		}
 		log.Println(err)
 	} else {
-		feedback = "Left the queue..."
+		feedback = leaveQueueSuccess
 	}
 	return feedback
 }

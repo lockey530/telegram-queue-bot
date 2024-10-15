@@ -47,7 +47,9 @@ const (
 	/howlong - check how many people are in front of you.
 	`
 
-	// users
+	/*
+		user command specific messages
+	*/
 	nonTextFeedback string = "I don't know what this is :( please send me text commands!"
 
 	nonCommandFeedback string = "Please input a command which starts with '/', like /start"
@@ -57,30 +59,50 @@ const (
 	joinQueueAlreadyJoined string = "You have already joined this queue!"
 	joinQueueSuccess       string = "Joined the queue. (Check the queue with /howlong.)"
 	joinQueueFailure       string = "You were unable to join the queue due to an unexpected error :("
+	joinQueueClosed        string = "sorry, queue closed!"
 
 	leaveQueueNotJoined string = "It seems you have not joined this queue yet!"
 	leaveQueueSuccess   string = "Left the queue..."
 	leaveQueueFailure   string = "You were unable to leave the queue due to an unexpected error :("
 
-	// admins
-	seeQueueStateSuccess string = "Something went wrong when accessing the queue state :("
+	/*
+		admin command specific messages (feedback for admins)
+	*/
+	seeQueueStateFailure string = "Something went wrong when accessing the queue state :("
 
-	removeFirstInQueueSuccess string = "successfully removed first peson in queue. Removed: "
-	removeFirstInQueueFailure string = "failed to remove first person in queue. Error: "
+	removeFirstInQueueSuccess string = "successfully removed first peson in queue."
+	removeFirstInQueueFailure string = "failed to remove first person in queue."
 
-	kickCommandInvalidArguments string = "input the handle of the person you are kicking, e.g. /kick @xyz"
+	kickCommandInvalidArguments string = "input the username to kick. Example: /kick @userABC"
 	kickCommandInvalidUser      string = "user inputted was not in queue."
 	kickCommandUserFeedback     string = "You have been removed from the queue."
 	kickCommandAdminFeedback    string = "First person in queue kicked and notified"
 
-	// append reason behind this string.
-	addAdminFailure string = "failed to add admin :("
-	addAdminSuccess string = "added successfully!"
-	// append reason behind this string.
-	removeAdminFailure string = "failed to remove admin :("
-	removeAdminSuccess string = "removed successfully!"
+	pingFirstInQueueSuccess string = "First person in queue notified."
+	// to append with error reason
+	pingFirstInQueueFailure string = "You failed to notify the first person: "
 
-	pingCommandUserFeedback string = "Hey, you are the first person in queue! get moving :D"
+	// admin list
+	addAdminInvalidArguments string = "input the username to add as an admin. Example: /addadmin @userABC"
+	addAdminFailure          string = "failed to add admin :("
+	addAdminSuccess          string = "added successfully!"
+
+	removeAdminInvalidArguments string = "input the username to remove as an admin. Example: /removeadmin @userABC"
+	removeAdminFailure          string = "failed to remove admin :("
+	removeAdminSuccess          string = "removed successfully!"
 
 	checkAdminListFailure string = "Unable to retrieve admins :("
+
+	// queue (should always be a success - add failure messages otherwise)
+	startQueueSuccess string = "queue has been opened for entry."
+	stopQueueSuccess  string = "queue has been closed."
+
+	/*
+		admin command specific messages (feedback for users)
+	*/
+	firstInQueueFeedback  string = "It is your turn for the photbooth!"
+	secondInQueueFeedback string = "You are the next person in queue - head down to the photobooth!"
+	thirdInQueueFeedback  string = "2 groups left in front of you - please head down to the photobooth!"
+
+	kickedFromQueueFeedback string = "You have been kicked from the queue."
 )
