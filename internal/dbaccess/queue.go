@@ -28,7 +28,7 @@ func CheckQueueContents() ([]types.QueueUser, error) {
 	queue := []types.QueueUser{}
 	if err := db.Select(&queue, `
 	SELECT 
-		queue_id, user_handle, chat_id, (joined_at AT TIME ZONE 'UTC' AT TIME ZONE 'UTC-8')
+		queue_id, user_handle, chat_id, (joined_at AT TIME ZONE 'UTC-8') AS joined_at
 	FROM queue;`); err != nil {
 		return nil, fmt.Errorf("failed to get queue state. %v", err)
 	}
@@ -39,7 +39,6 @@ func CheckQueueContents() ([]types.QueueUser, error) {
 func CheckIfInQueue(userHandle string) (bool, error) {
 	var isInQueue bool
 
-	fmt.Println(userHandle)
 	if err := db.Get(&isInQueue, "SELECT EXISTS (SELECT 1 FROM queue WHERE user_handle = $1);", userHandle); err != nil {
 		return false, fmt.Errorf("failed to get queue state. %v", err)
 	}

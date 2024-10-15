@@ -11,10 +11,10 @@ const (
 
 	queueSchema string = `
 		CREATE TABLE queue (
-			queue_id				SERIAL 		PRIMARY KEY,
-			user_handle		 		TEXT 		UNIQUE	NOT NULL,
-			chat_id					BIGSERIAL 	UNIQUE NOT NULL,
-			joined_at 				TIMESTAMP 	DEFAULT CURRENT_TIMESTAMP
+			queue_id				SERIAL 			PRIMARY KEY,
+			user_handle		 		TEXT 			UNIQUE	NOT NULL,
+			chat_id					BIGSERIAL 		UNIQUE NOT NULL,
+			joined_at 				TIMESTAMPTZ 	DEFAULT NOW()
 		);
 	`
 
