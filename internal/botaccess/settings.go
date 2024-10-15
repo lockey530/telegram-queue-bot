@@ -100,7 +100,7 @@ const (
 	/*
 		admin command specific messages (feedback for users)
 	*/
-	firstInQueueFeedback  string = "It is your turn for the photbooth!"
+	firstInQueueFeedback  string = "It is your turn for the photobooth!"
 	secondInQueueFeedback string = "You are the next person in queue - head down to the photobooth!"
 	thirdInQueueFeedback  string = "2 groups left in front of you - please head down to the photobooth!"
 
