@@ -69,10 +69,12 @@ func GetPositionInQueue(position int) (userHandle string, chatID int64, err erro
 			joined_at;
 	`)
 
+	fmt.Println(chat)
+
 	if err != nil {
 		return "", -1, err
 	} else if len(chat) < position {
-		return "", -1, fmt.Errorf("your queue only has %v people\n", len(chat))
+		return "", -1, fmt.Errorf("your queue only has %v people", len(chat))
 	}
 
 	return chat[position-1].UserHandle, chat[position-1].ChatID, nil

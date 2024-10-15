@@ -229,10 +229,10 @@ func RemoveFirstInQueueCommand(userMessage tgbotapi.Update, bot *tgbotapi.BotAPI
 
 	msg := tgbotapi.NewMessage(removed, "Beep boop, thank you for coming =)")
 	_, err = bot.Send(msg)
-	if err != nil {
-		log.Printf("Error sending message %v\n", err)
-		return fmt.Sprintf("Error sending message %v\n", err)
-	}
+	// if err != nil {
+	// 	log.Printf("Error sending message %v\n", err)
+	// 	return fmt.Sprintf("Error sending message %v\n", err)
+	// }
 
 	_, nextPersonChatID, _ := dbaccess.GetPositionInQueue(1)
 	if nextPersonChatID != -1 {

@@ -22,3 +22,6 @@ go.work
 
 # Telegram bot token
 *.env
+
+# Mac items
+.DS_Store
