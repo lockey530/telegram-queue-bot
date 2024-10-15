@@ -2,7 +2,7 @@ package botaccess
 
 const (
 	userHelpFeedback string = `
-	Welcome to the Battambang queue bot!
+	Welcome to the Battambang queue bot! Join the queue and you will be able to check how many groups are in front of you! We will also notify you when its nearing your turn so please watch out for our message :)
 
 	/join - join the photobooth queue.
 
