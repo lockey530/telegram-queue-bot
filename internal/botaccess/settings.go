@@ -13,6 +13,12 @@ const (
 	/help - view the available functions for this bot.
 
 	For more options, check out the 'Menu' button at the bottom left of this chat!
+
+ 	IMPORTANT: QUEUE POLICY
+	- When you get notified that your turn is reaching soon, gather your group and head to the photo booth IMMEDIATELY
+	- Once at the Photo Booth, tell the IC your tele handle to verify your group
+	- If you don’t show up within 5 mins of it reaching your turn, you will be kicked out of the queue automatically, you will have to queue again. So make sure to turn on notif and check your messages if you are queueing for your group
+	- Walk-ins will NOT be entertained
 	`
 
 	adminHelpFeedback string = `
