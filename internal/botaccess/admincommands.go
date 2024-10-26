@@ -28,7 +28,7 @@ var AdminCommands = []types.AcceptedCommands{
 	},
 	{
 		Command:     "done",
-		Description: "remove the first person from the queue once they have finished their photo-taking.",
+		Description: "remove the first person from the queue once they have finished their photo taking.",
 		Handler:     RemoveFirstInQueueCommand,
 	},
 	{
